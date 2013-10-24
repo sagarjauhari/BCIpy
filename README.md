@@ -9,3 +9,11 @@ R --vanilla < /path/to/sketchpad.R
 </pre>
 
 It will produce a PDF called Rplots.pdf with a page for each chart produced by the script.
+
+## Using Python notebooks
+<pre>
+sudo apt-get install ipython
+git clone git@github.com:sagarjauhari/edm_eeg.git edm_eeg.git
+cd edm_eeg.git
+ipython notebook --pylab-inline
+</pre>
