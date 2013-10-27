@@ -37,3 +37,6 @@ nosetests.xml
 
 # Data
 *.csv
+
+# Sagar
+*dev_settings.py
