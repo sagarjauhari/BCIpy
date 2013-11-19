@@ -13,6 +13,10 @@ try: # Import config params
 except ImportError:
    print "Please create a dev_settings.py using dev_settings.py.example as an example"
 
+def print_config():
+    print config.DATA_URL
+    print config.SAVE_URL
+
 def format_time(ti):
     """
     Converts format '2010-12-14 16:56:36.996' to Decimal
@@ -67,3 +71,57 @@ def compress_time_labels(file_name):
                 t_e = row[2]
                 lab = row[3]
         fw.writerow([str(t_id),str(t_s), str(t_e), lab]) #last row
+
+def label_data(in_file, out_file, compressed_label_file, subj_t, time_t, dbg=False):
+    if dbg: print "#"+subj_t + "--------"
+    
+    with open(in_file, 'rb') as fi,\
+    open(out_file, 'rb') as fi2,\
+    open(compressed_label_file, 'w') as fo:
+        
+        day = time_t[0:4]+"-"+time_t[4:6]+"-"+time_t[6:8]
+        fr1 = csv.reader(fi,  delimiter=',') # combined.csv
+        fr2 = csv.reader(fi2, delimiter='\t')# xls_labels.csv
+        fw  = csv.writer(fo,  delimiter='\t')# combined_label_uncompress.csv
+        
+        if dbg: print "day: " + day
+        
+        #headers
+        fw.writerow(next(fr1, None) + ['Difficulty', 'taskid'] )
+        next(fr2, None)
+        
+        #forward till subject data starts
+        lab_row = fr2.next()
+        while subj_t != lab_row[2]:
+            lab_row = fr2.next()
+        if dbg: print "start: " + str(lab_row[0])
+        
+        for idx, row in enumerate(fr1):
+            row[0] = datetime.strptime(day+' '+row[0]+'.0',\
+                            '%Y-%m-%d %H:%M:%S.%f').strftime('%s.%f')
+            if Decimal(row[0]) < Decimal(lab_row[3]): # t < start_time
+                if dbg: print str(idx)+": t<start_time"
+                label = -1
+                fw.writerow(row + [label, lab_row[0]])
+                continue
+                
+            if Decimal(row[0]) <= Decimal(lab_row[4]): # t <= end_time
+                if dbg: print str(idx)+": t <= end_time"
+                label = lab_row[5]
+                fw.writerow(row + [label, lab_row[0]])
+                continue
+            
+            while Decimal(row[0] > lab_row[4]): # t > end_time
+                try:
+                    lab_row = next(fr2)
+                    label = lab_row[5]
+                    if lab_row[2] != subj_t:
+                        raise Exception("Reached end of data for subject" + subj_t)
+                except Exception as e: # reached end of file, or next subject
+                    label = -1
+                    if dbg: print e
+                    break
+            fw.writerow(row + [label,lab_row[0]])
+        
+        if dbg: print "end:   "+str(lab_row[0])
+    return
