@@ -162,20 +162,20 @@ def label_data_raw_signal(in_file, compressed_label_file, out_file):
         for row in fr1:
             row[0] = datetime.strptime(day+' '+row[0],\
                             '%Y-%m-%d %H:%M:%S.%f').strftime('%s.%f')
-            if Decimal(row[0]) < Decimal(lab_row[1]): # t < start_time
+            if Decimal(row[0]) < Decimal(lab_row[3]): # t < start_time
                 label = -1
                 fw.writerow(row + [label, lab_row[0]])
                 continue
                 
-            if Decimal(row[0]) < Decimal(lab_row[2]): # t < end_time
-                label = lab_row[3]
+            if Decimal(row[0]) < Decimal(lab_row[4]): # t < end_time
+                label = lab_row[5]
                 fw.writerow(row + [label, lab_row[0]])
                 continue
             
-            while Decimal(row[0] > lab_row[2]): # t > end_time
+            while Decimal(row[0] > lab_row[4]): # t > end_time
                 try:
                     lab_row = next(fr2)
-                    label = lab_row[3]
+                    label = lab_row[5]
                 except: # reached end of file
                     label = -1
                     break
