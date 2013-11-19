@@ -40,3 +40,4 @@ nosetests.xml
 
 # Sagar
 *dev_settings.py
+*.pickle
