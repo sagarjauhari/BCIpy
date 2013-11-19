@@ -125,3 +125,59 @@ def label_data(in_file, out_file, compressed_label_file, subj_t, time_t, dbg=Fal
         
         if dbg: print "end:   "+str(lab_row[0])
     return
+
+def create_raw_incremental(in_file, out_file):
+    "Create raw file with incremental miliseconds"
+    with open(in_file,'rb') as fi, open(out_file,'w') as fo:
+        fr = csv.reader(fi, delimiter=',')
+        fw = csv.writer(fo, delimiter=',')
+        
+        fw.writerow(next(fr))#header
+        
+        c=0.0
+        prev_time = '100'#dummy
+        for row in fr:
+            if row[0]==prev_time:
+                c = c + 0.001
+            else:
+                c = 0.0
+                prev_time = row[0]
+            fw.writerow([row[0] + '.' + str(c).split('.')[1], row[1]])
+
+def label_data_raw_signal(in_file, compressed_label_file, out_file):
+    with open(in_file, 'rb') as fi,\
+    open(compressed_label_file, 'rb') as fi2,\
+    open(out_file, 'w') as fo:
+        
+        day = '2010-12-14' #later, parse from file name
+        fr1 = csv.reader(fi,  delimiter=',') # combined.csv
+        fr2 = csv.reader(fi2, delimiter='\t')# labels_compress.csv
+        fw  = csv.writer(fo,  delimiter='\t')# combined_label.csv
+        
+        #headers
+        fw.writerow(next(fr1, None) + ['Difficulty', 'TaskId'])
+        next(fr2, None)
+        
+        lab_row = fr2.next()
+        for row in fr1:
+            row[0] = datetime.strptime(day+' '+row[0],\
+                            '%Y-%m-%d %H:%M:%S.%f').strftime('%s.%f')
+            if Decimal(row[0]) < Decimal(lab_row[1]): # t < start_time
+                label = -1
+                fw.writerow(row + [label, lab_row[0]])
+                continue
+                
+            if Decimal(row[0]) < Decimal(lab_row[2]): # t < end_time
+                label = lab_row[3]
+                fw.writerow(row + [label, lab_row[0]])
+                continue
+            
+            while Decimal(row[0] > lab_row[2]): # t > end_time
+                try:
+                    lab_row = next(fr2)
+                    label = lab_row[3]
+                except: # reached end of file
+                    label = -1
+                    break
+            fw.writerow(row + [label, lab_row[0]])
+    return
