@@ -1,4 +1,5 @@
 from eegml import *
+from os.path import join
 
 try: # Import config params
    from dev_settings import *
@@ -6,7 +7,7 @@ except ImportError:
    print "Please create a dev_settings.py using dev_settings.py.example as an example"
 
 format_task_xls()
-compress_time_labels("./preprocess/task_xls_labels.csv")
+compress_time_labels(join(SAVE_URL,"task_xls_labels.csv"))
 
 from os import listdir
 from os.path import isfile, join
@@ -23,7 +24,8 @@ for i in sub_dict:
             SAVE_URL + "/"+sub_dict[i] + "." +i+".labelled.csv",
             i, sub_dict[i])
 
-create_raw_incremental(DATA_URL + "/20101214163931.a.rawwave.csv", "preprocess/raw_incremental.csv")
-label_data_raw_signal("preprocess/raw_incremental.csv",
-            "preprocess/task_xls_labels.csv",
-            "preprocess/raw_incremental_label.csv")
+create_raw_incremental(join(DATA_URL, "20101214163931.a.rawwave.csv"),
+                       join(SAVE_URL,"raw_incremental.csv"))
+label_data_raw_signal(join(SAVE_URL,"raw_incremental.csv"),
+            join(SAVE_URL,"task_xls_labels.csv"),
+            join(SAVE_URL,"raw_incremental_label.csv"))
