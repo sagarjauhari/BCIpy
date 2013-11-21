@@ -7,6 +7,7 @@ from matplotlib import *
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
 pylab.rcParams['figure.figsize'] = 15, 6
+from os.path import join
 
 try: # Import config params
    import dev_settings as config
@@ -26,9 +27,9 @@ def format_time(ti):
     to = Decimal(to.strftime('%s.%f'))
     return str(to)
     
-def format_task_xls():
-    path_task_xls = config.DATA_URL + "/task.xls"
-    path_task_xls_labels = config.SAVE_URL + "/task_xls_labels.csv"
+def format_task_xls(file):
+    path_task_xls = join(config.DATA_URL, file + ".xls")
+    path_task_xls_labels = join(config.SAVE_URL,  file + "_xls_labels.csv")
     
     with open(path_task_xls, 'rb') as fi,\
     open(path_task_xls_labels, 'w') as fo:
@@ -144,22 +145,29 @@ def create_raw_incremental(in_file, out_file):
                 prev_time = row[0]
             fw.writerow([row[0] + '.' + str(c).split('.')[1], row[1]])
 
-def label_data_raw_signal(in_file, compressed_label_file, out_file):
+def label_data_raw(in_file, out_file, task_xls_label_file, mach_t, time_t, dbg=False):
+    if dbg: print "#"+mach_t + "--------"
+    
     with open(in_file, 'rb') as fi,\
-    open(compressed_label_file, 'rb') as fi2,\
+    open(task_xls_label_file, 'rb') as fi2,\
     open(out_file, 'w') as fo:
         
-        day = '2010-12-14' #later, parse from file name
-        fr1 = csv.reader(fi,  delimiter=',') # combined.csv
-        fr2 = csv.reader(fi2, delimiter='\t')# labels_compress.csv
-        fw  = csv.writer(fo,  delimiter='\t')# combined_label.csv
+        day = time_t[0:4]+"-"+time_t[4:6]+"-"+time_t[6:8]
+        fr1 = csv.reader(fi,  delimiter=',') #microsec file
+        fr2 = csv.reader(fi2, delimiter='\t')# xls_labels.csv
+        fw  = csv.writer(fo,  delimiter='\t')
         
         #headers
-        fw.writerow(next(fr1, None) + ['Difficulty', 'TaskId'])
+        fw.writerow(next(fr1, None) + ['Difficulty', 'taskid'] )
         next(fr2, None)
         
+        #forward till subject mach starts
         lab_row = fr2.next()
-        for row in fr1:
+        while mach_t != lab_row[1]:
+            lab_row = fr2.next()
+        if dbg: print "start: " + str(lab_row[0])
+        
+        for idx, row in enumerate(fr1):
             row[0] = datetime.strptime(day+' '+row[0],\
                             '%Y-%m-%d %H:%M:%S.%f').strftime('%s.%f')
             if Decimal(row[0]) < Decimal(lab_row[3]): # t < start_time
@@ -180,4 +188,6 @@ def label_data_raw_signal(in_file, compressed_label_file, out_file):
                     label = -1
                     break
             fw.writerow(row + [label, lab_row[0]])
+        
+        if dbg: print "end:   "+str(lab_row[0])
     return
