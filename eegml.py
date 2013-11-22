@@ -7,7 +7,8 @@ from matplotlib import *
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
 pylab.rcParams['figure.figsize'] = 15, 6
-from os.path import join
+from os import listdir
+from os.path import join, isfile
 from scipy.signal import butter, lfilter, freqz
 import numpy as np
 
@@ -236,3 +237,75 @@ def plot_butter(fs, lowcut, highcut, orders):
         plt.ylabel('Gain')
         plt.grid(True)
         plt.legend(loc='best')
+
+def do_filter_signal(data, low_cut, high_cut, fs, order, out_file):
+    data_np = np.array([float(i[1]) for i in data])
+    data_filtered = butter_bandpass_filter(data_np,
+                                           low_cut,
+                                           high_cut,
+                                           fs,
+                                           order)
+    
+    fig, ax = plt.subplots()
+    ax.plot([i[1] for i in data[0:200]], label="Original Signal")
+    ax.plot(data_filtered[0:200], label="Filtered Signal")
+    plt.grid(True)
+    plt.legend(loc='best')
+    plt.title("data[0:200]")
+    
+    with open(out_file,'w') as fo:
+        fw = csv.writer(fo)
+        fw.writerow(list(data_filtered))
+        
+def get_subject_list(dir_url):
+    onlyfiles = [ f for f in listdir(dir_url) if isfile(join(dir_url,f)) ]
+    pat = re.compile("[0-9]*\.[0-9]*\.labelled\.csv")
+    temp_dat = [f.split('.')[0:2] for f in onlyfiles if pat.match(f)]
+    sub_dict = {i[1]: i[0] for i in temp_dat}
+    return sub_dict
+
+def get_data(subj_list, dir_url):
+    subj_data = {}
+    for s_id in subj_list.keys():
+        s_time = subj_list[s_id]
+        s_file = s_time + "." + s_id + ".labelled.csv"
+        with open(join(dir_url,s_file), 'rb') as fi:
+            fr = csv.reader(fi,delimiter="\t")
+            next(fr) #header
+            s_data = list(fr)
+            subj_data[int(s_id)] = s_data
+    return subj_data
+
+def get_counts(data):
+    return [(i,len(data[i])) for i in data]
+    
+def plot_subject(s_comb, title=None):
+    fig, ax = plt.subplots()
+    x_ax = [int(i[0].split('.')[0]) for i in s_comb]
+    
+    sig_q = [int(i[1]) for i in s_comb]
+    atten = [int(i[2]) for i in s_comb]
+    medit = [int(i[3]) for i in s_comb]
+    diffi = [int(i[4])*50 for i in s_comb]
+    taskid= [int(i[5]) for i in s_comb]
+    taskid_set = list(set(taskid))
+    taskid_norm = [taskid_set.index(i) for i in taskid]
+    
+    ax.plot(x_ax,sig_q, label='Quality')
+    ax.plot(x_ax, atten, label='Attention')
+    ax.plot(x_ax, medit, label='Meditation')
+    ax.plot(x_ax, diffi, label='Difficulty')
+    #ax.plot(x_ax, taskid_norm, label='taskid')
+    
+    ax.grid(True)
+    fig.tight_layout()
+    plt.legend(loc='upper left')
+    plt.title(title)
+    plt.show()
+    return
+
+def plot_subjects(subj_list,data, count):
+    for i in range(count):
+        s1 = subj_list.keys()[i]
+        plot_subject(data[int(s1)], "Subject: "+s1)
+    return

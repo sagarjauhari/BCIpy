@@ -4,7 +4,8 @@ from os.path import join
 try: # Import config params
    from dev_settings import *
 except ImportError:
-   print "Please create a dev_settings.py using dev_settings.py.example as an example"
+   print "Please create a dev_settings.py using dev_settings.py.example as\
+          an example"
 
 format_task_xls("task")
 compress_time_labels(join(SAVE_URL,"task_xls_labels.csv"))
@@ -53,9 +54,9 @@ for i in mach_dict:
     create_raw_incremental(file_in,file_out)
     
     label_data_raw(file_out,
-                   join(SAVE_URL,'raw', mach_dict[i]+"."+i+".rawwave_label.csv"),
-                   join(SAVE_URL, "task_for_raw_xls_labels.csv"),
-                   i, mach_dict[i])
+                 join(SAVE_URL,'raw', mach_dict[i]+"."+i+".rawwave_label.csv"),
+                 join(SAVE_URL, "task_for_raw_xls_labels.csv"),
+                 i, mach_dict[i])
 
 #==============================================================================
 # Plot raw signal
@@ -80,4 +81,14 @@ with open(join(SAVE_URL, "raw_incremental_label.csv"), 'r') as fi:
 fs = 512.0
 lowcut = 0.1
 highcut = 20.0
+
 plot_butter(fs, lowcut, highcut, [1,2,3,4,5,6,7,8])
+do_filter_signal(data, lowcut, highcut, fs, 4,
+                 join(SAVE_URL,'raw_filtered.csv'))
+                 
+#==============================================================================
+# Individual 1hz data of subjects
+#==============================================================================
+subj_list = get_subject_list(SAVE_URL)
+subj_data = get_data(subj_list, SAVE_URL)
+plot_subjects(subj_list, subj_data, 4)
