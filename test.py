@@ -1,5 +1,8 @@
 from eegml import *
 from os.path import join
+import pickle
+from sklearn.ensemble import RandomForestClassifier
+import pandas as pd
 
 try: # Import config params
    from dev_settings import *
@@ -92,3 +95,62 @@ do_filter_signal(data, lowcut, highcut, fs, 4,
 subj_list = get_subject_list(SAVE_URL)
 subj_data = get_data(subj_list, SAVE_URL)
 plot_subjects(subj_list, subj_data, 4)
+
+# Data Cleaning
+"""
+Looks like some of the subjects like 24 have all '0' attention and meditation 
+values. Also, at several places, the quality value of signals is 'non-zero'. 
+In Tan's thesis, they have discarded the entire trial if the quality was non 
+zero:
+
+A trial was considered good if the quality signal indicated a value of 0 for 
+the duration of the entire trial, that is, the level of noise present in the 
+trial was acceptable; otherwise, the trial was excluded from analyses in this 
+thesis.
+
+However, initial plan is to remove just the data for the time slots 
+corresponding to non-zero quality
+"""
+cln_data = clean_all(subj_list, subj_data)
+pickle.dump(cln_data,open(join(SAVE_URL,"cln_data.pickle"),'wb'))
+
+plot_cleaned_counts(subj_data, cln_data)
+plot_subjects(subj_list, cln_data, 4)
+
+#==============================================================================
+# Random Forest Classifier
+#    Bib: [Breiman, Leo. "Random forests." Machine learning 45.1 (2001): 5-32.]
+#    Brief overview: http://blog.yhathq.com/posts/random-forests-in-python.html
+# This classifier is often as the first technique to find out obvious and 
+# sometimes not-so-obvious relationships
+#==============================================================================
+subj_id = 27
+
+df = pd.DataFrame({'att':[int(i[2]) for i in cln_data[subj_id]],
+                    'med':[int(i[3]) for i in cln_data[subj_id]],
+                    'difficulty':[int(i[4]) for i in cln_data[subj_id]]})
+df['is_train'] = np.random.uniform(0, 1, len(df)) <= .75
+df.head()
+
+from sklearn.metrics import classification_report
+
+train, test = df[df['is_train']==True], df[df['is_train']==False]
+features = df.columns[[0,2]]
+
+clf = RandomForestClassifier(n_jobs=2)
+clf.fit(train[features], train['difficulty'])
+
+preds = clf.predict(test[features])
+
+print classification_report(test['difficulty'], preds)
+pd.crosstab(test['difficulty'], preds, rownames=['actual'], colnames=['preds'])
+
+#==============================================================================
+# Justis' idea of analysing the correlation between time taken to read a 
+# sentence with the difficulty
+# Correlation - Pearson's R value
+# Header of task.xls
+# ['machine', 'SUBJECT', 'start_time', 'end_time', 'stim', 'block', 'pool', 
+#                                     'modality', 'TEXT', 'difficulty']
+#==============================================================================
+get_num_words()

@@ -11,6 +11,8 @@ from os import listdir
 from os.path import join, isfile
 from scipy.signal import butter, lfilter, freqz
 import numpy as np
+import pickle
+from scipy.stats.stats import pearsonr
 
 import warnings
 warnings.filterwarnings('ignore', 'DeprecationWarning')
@@ -304,8 +306,69 @@ def plot_subject(s_comb, title=None):
     plt.show()
     return
 
-def plot_subjects(subj_list,data, count):
+def plot_subjects(subj_list, data, count):
     for i in range(count):
         s1 = subj_list.keys()[i]
         plot_subject(data[int(s1)], "Subject: "+s1)
     return
+
+def clean_subj(s_data):
+    s_data = [i for i in s_data if int(i[1])==0 and \
+                int(i[2])>0 and \
+                int(i[3])>0 and \
+                int(i[4]) >-1] #difficulty
+    return s_data
+
+def clean_all(subj_list, subj_data):
+    cln_data = {}
+    for s in subj_list.keys():
+        cln_data[int(s)] = clean_subj(subj_data[int(s)])
+    return cln_data
+
+def plot_cleaned_counts(subj_data, cln_data):
+    cnt1=get_counts(subj_data)
+    cnt2=get_counts(cln_data)
+    
+    fig, ax = plt.subplots()
+    
+    ax.plot([i[0] for i in cnt1], [i[1] for i in cnt1], "-o", label="original")
+    ax.plot([i[0] for i in cnt2], [i[1] for i in cnt2], "-o", label="cleaned")
+    plt.xlabel("Id")
+    plt.ylabel("Size")
+    plt.legend()
+    plt.grid()
+    plt.title("Comparing original and new size of data")
+    
+def get_num_words():
+    path_task_xls = DATA_URL + "/task.xls"
+    
+    with open(path_task_xls, 'rb') as fi:
+        fr = csv.reader(fi, delimiter='\t')
+        next(fr)#header
+
+        data = list(fr)
+        data_cols = zip(*data)
+        
+        l=len(data_cols[0])
+        num_words_stim = [float(len(i.split())) for i in data_cols[4]]
+        num_chars_stim = [float(len(i)) for i in data_cols[4]]
+        difficulty = [float(i) for i in data_cols[-1]]
+        time_diff = [float(Decimal(format_time(data_cols[3][i]))-\
+                    Decimal(format_time(data_cols[2][i])))\
+                    for i in xrange(l)]
+        
+        time_per_word = [time_diff[i]/num_words_stim[i] for i in range(l)]
+        time_per_char = [time_diff[i]/num_chars_stim[i] for i in range(l)]
+        
+        sentence_idx=[i for i in xrange(l) if num_words_stim[i] > 1]
+        
+        print pearsonr(time_per_word, difficulty)
+        print pearsonr(time_per_char, difficulty)
+
+        print pearsonr([time_per_word[i] for i in sentence_idx], 
+                       [difficulty[i] for i in sentence_idx])
+        print pearsonr([time_per_char[i] for i in sentence_idx], 
+                       [difficulty[i] for i in sentence_idx])
+
+        tpa = [difficulty[i] for i in sentence_idx]
+        hist(tpa)
