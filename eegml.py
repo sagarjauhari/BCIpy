@@ -8,6 +8,12 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
 pylab.rcParams['figure.figsize'] = 15, 6
 from os.path import join
+from scipy.signal import butter, lfilter, freqz
+import numpy as np
+
+import warnings
+warnings.filterwarnings('ignore', 'DeprecationWarning')
+
 
 try: # Import config params
    import dev_settings as config
@@ -191,3 +197,42 @@ def label_data_raw(in_file, out_file, task_xls_label_file, mach_t, time_t, dbg=F
         
         if dbg: print "end:   "+str(lab_row[0])
     return
+    
+def plot_signal(x_ax, y_ax, label, ax=None):
+    if ax==None:
+        fig, ax = plt.subplots()
+    ax.plot(x_ax, y_ax, label=label)
+    ax.grid(True)
+    fig.tight_layout()
+    plt.legend(loc='upper left')
+    plt.show()
+    return ax
+    
+def butter_bandpass(lowcut, highcut, fs, order=5):
+    """
+    http://wiki.scipy.org/Cookbook/ButterworthBandpass
+    """
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = butter(order, [low, high], btype='band')
+    return b, a
+
+def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
+    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
+    
+def plot_butter(fs, lowcut, highcut, orders):
+    """Plot the frequency response for a few different orders."""
+    plt.figure(1)
+    plt.clf()
+    for order in orders:
+        b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+        w, h = freqz(b, a, worN=2000)
+        plt.plot((fs * 0.5 / np.pi) * w, abs(h), label="order = %d" % order)
+        plt.title("Sample frequency responses of the band filter")
+        plt.xlabel('Frequency (Hz)')
+        plt.ylabel('Gain')
+        plt.grid(True)
+        plt.legend(loc='best')
