@@ -228,7 +228,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     
 def plot_butter(fs, lowcut, highcut, orders):
     """Plot the frequency response for a few different orders."""
-    plt.figure(1)
+    plt.figure()
     plt.clf()
     for order in orders:
         b, a = butter_bandpass(lowcut, highcut, fs, order=order)
@@ -247,18 +247,21 @@ def do_filter_signal(data, low_cut, high_cut, fs, order, out_file):
                                            high_cut,
                                            fs,
                                            order)
+    limit=2000
     
     fig, ax = plt.subplots()
-    ax.plot([i[1] for i in data[0:2000]], label="Original Signal")
-    ax.plot(data_filtered[0:2000], label="Filtered Signal")
+    ax.plot([i[1] for i in data[0:limit]], label="Original Signal")
+    ax.plot(data_filtered[0:limit], label="Filtered Signal")
     plt.grid(True)
     plt.legend(loc='best')
-    plt.title("data[0:200]")
+    plt.title("data[0:"+str(limit)+"]")
     
-    with open(out_file,'w') as fo:
-        fw = csv.writer(fo)
-        fw.writerow(list(data_filtered))
-
+    if out_file is not None:
+        with open(out_file,'w') as fo:
+            fw = csv.writer(fo)
+            fw.writerow(list(data_filtered))
+    
+    return data_filtered
         
 def get_subject_list(dir_url):
     onlyfiles = [ f for f in listdir(dir_url) if isfile(join(dir_url,f)) ]
