@@ -384,3 +384,40 @@ def create_dict_machine_data(raw_dir):
     temp_dat_raw = [f.split('.')[0:2] for f in onlyfiles_raw if pat_raw.match(f)]
     mach_dict = {i[1]: i[0] for i in temp_dat_raw}
     return mach_dict
+    
+def get_performance(x,y):
+    """ Measures the performance metrics for x(actual) 
+        and y (experimental).
+    """
+    if len(x) != len(y):
+        print "Error: Lengths not same"
+        return
+    TP = FN = FP = TN = 0.0
+    
+    for i in range(0,len(x)):
+        for j in range(0, len(x)):
+            if i == j:
+                continue
+            
+            if x[i]==x[j] and y[i]==y[j]:
+                TP = TP + 1
+            elif x[i]!=x[j] and y[i]!=y[j]:
+                TN = TN + 1
+            elif x[i]==x[j] and y[i]!=y[j]:
+                FN = FN + 1
+            elif x[i]!=x[j] and y[i]==y[j]:
+                FP = FP + 1
+    TP = TP/2
+    TN = TN/2
+    FN = FN/2
+    FP = FP/2
+    
+    accuracy = (TP + TN) / (TP + TN + FP + FN)
+    precision = TP/(TP + FP)
+    recall = TP/(TP + FN)
+    fscore = 2*precision*recall/(precision + recall)
+    
+    print "  Accuracy: \t" + str(round(accuracy, 3))
+    print "  Precision: \t" + str(round(precision, 3))
+    print "  Recall: \t" + str(round(recall, 3))
+    print "  F-Score: \t" + str(round(fscore, 3))
