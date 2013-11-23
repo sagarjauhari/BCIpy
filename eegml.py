@@ -249,8 +249,8 @@ def do_filter_signal(data, low_cut, high_cut, fs, order, out_file):
                                            order)
     
     fig, ax = plt.subplots()
-    ax.plot([i[1] for i in data[0:200]], label="Original Signal")
-    ax.plot(data_filtered[0:200], label="Filtered Signal")
+    ax.plot([i[1] for i in data[0:2000]], label="Original Signal")
+    ax.plot(data_filtered[0:2000], label="Filtered Signal")
     plt.grid(True)
     plt.legend(loc='best')
     plt.title("data[0:200]")
@@ -258,6 +258,7 @@ def do_filter_signal(data, low_cut, high_cut, fs, order, out_file):
     with open(out_file,'w') as fo:
         fw = csv.writer(fo)
         fw.writerow(list(data_filtered))
+
         
 def get_subject_list(dir_url):
     onlyfiles = [ f for f in listdir(dir_url) if isfile(join(dir_url,f)) ]
@@ -339,7 +340,7 @@ def plot_cleaned_counts(subj_data, cln_data):
     plt.grid()
     plt.title("Comparing original and new size of data")
     
-def get_num_words():
+def get_num_words(DATA_URL):
     path_task_xls = DATA_URL + "/task.xls"
     
     with open(path_task_xls, 'rb') as fi:
@@ -371,4 +372,12 @@ def get_num_words():
                        [difficulty[i] for i in sentence_idx])
 
         tpa = [difficulty[i] for i in sentence_idx]
-        hist(tpa)
+        plt.hist(tpa)
+        
+# Create dict of machine data
+def create_dict_machine_data(raw_dir):
+    onlyfiles_raw = [ f for f in listdir(raw_dir) if isfile(join(raw_dir,f)) ]
+    pat_raw = re.compile("[0-9]*\.[a-z]\.rawwave\.csv")
+    temp_dat_raw = [f.split('.')[0:2] for f in onlyfiles_raw if pat_raw.match(f)]
+    mach_dict = {i[1]: i[0] for i in temp_dat_raw}
+    return mach_dict

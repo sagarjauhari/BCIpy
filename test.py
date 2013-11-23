@@ -37,12 +37,8 @@ for i in sub_dict:
 #==============================================================================
 # Raw Data
 #==============================================================================
-# Create dict of machine data
 raw_dir=join(DATA_URL,'raw')
-onlyfiles_raw = [ f for f in listdir(raw_dir) if isfile(join(raw_dir,f)) ]
-pat_raw = re.compile("[0-9]*\.[a-z]\.rawwave\.csv")
-temp_dat_raw = [f.split('.')[0:2] for f in onlyfiles_raw if pat_raw.match(f)]
-mach_dict = {i[1]: i[0] for i in temp_dat_raw}
+mach_dict = create_dict_machine_data(raw_dir)
 
 format_task_xls("task_for_raw")
 
@@ -153,4 +149,4 @@ pd.crosstab(test['difficulty'], preds, rownames=['actual'], colnames=['preds'])
 # ['machine', 'SUBJECT', 'start_time', 'end_time', 'stim', 'block', 'pool', 
 #                                     'modality', 'TEXT', 'difficulty']
 #==============================================================================
-get_num_words()
+get_num_words(DATA_URL)
