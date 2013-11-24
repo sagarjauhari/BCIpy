@@ -120,6 +120,7 @@ plot_subjects(subj_list, cln_data, 4)
 # This classifier is often as the first technique to find out obvious and 
 # sometimes not-so-obvious relationships
 #==============================================================================
+""" This throws errors on Justis's laptop
 subj_id = 27
 
 df = pd.DataFrame({'att':[int(i[2]) for i in cln_data[subj_id]],
@@ -140,6 +141,7 @@ preds = clf.predict(test[features])
 
 print classification_report(test['difficulty'], preds)
 pd.crosstab(test['difficulty'], preds, rownames=['actual'], colnames=['preds'])
+"""
 
 #==============================================================================
 # Justis' idea of analysing the correlation between time taken to read a 
