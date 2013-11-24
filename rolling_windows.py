@@ -21,6 +21,11 @@ def compare_window_sizes(series, sizeList):
     plt.legend(sizeList)
     plt.show()
 
+    plots = [pd.rolling_mean(series, size).plot() for size in sizeList]
+    plt.title('Comparison of rolling_mean() with different window sizes')
+    plt.legend(sizeList)
+    plt.show()
+
 if __name__ == "__main__":
     f = np.genfromtxt("preprocess/raw_filtered.csv", dtype=None, delimiter=',')
     #ts = pd.Series(d['Value'], index=d['Time'])
