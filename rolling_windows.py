@@ -3,21 +3,27 @@ import numpy as np
 import pylab
 import matplotlib.pyplot as plt
 
-"""
-d = np.genfromtxt("preprocess/raw/20101214163931.a.rawwave_label.csv", dtype=None, names=True)
-ts = pd.Series(d['Value'], index=d['Time'])
-pd.rolling_mean(ts, 60).plot()
-#pylab.plot([1,2,3])
-"""
+def plot_rolling_functions(series, window_size=128):
+    pd.rolling_median(series,window_size).plot(label='median')
+    pd.rolling_mean(series,window_size).plot(label='mean')
+    pd.rolling_std(series,window_size).plot(label='std')
+    pd.rolling_skew(series,window_size).plot(label='skew')
+    pd.rolling_kurt(series,window_size).plot(label='kurt')
+    pd.rolling_min(series,window_size).plot(label='min')
+    pd.rolling_max(series,window_size).plot(label='max')
+    plt.title('Various rolling window functions, window size %s' % (window_size))
+    plt.legend()
+    plt.show()
 
-window_size = 512
+def compare_window_sizes(series, sizeList):
+    plots = [pd.rolling_median(series, size).plot() for size in sizeList]
+    plt.title('Comparison of rolling_median() with different window sizes')
+    plt.legend(sizeList)
+    plt.show()
 
-f = np.genfromtxt("preprocess/raw_filtered.csv", dtype=None, delimiter=',')
-pd.rolling_median(pd.Series(f[20000:30000]),window_size).plot()
-pd.rolling_mean(pd.Series(f[20000:30000]),window_size).plot()
-pd.rolling_std(pd.Series(f[20000:30000]),window_size).plot()
-pd.rolling_skew(pd.Series(f[20000:30000]),window_size).plot()
-pd.rolling_kurt(pd.Series(f[20000:30000]),window_size).plot()
-pd.rolling_min(pd.Series(f[20000:30000]),window_size).plot()
-pd.rolling_max(pd.Series(f[20000:30000]),window_size).plot()
-plt.show()
+if __name__ == "__main__":
+    f = np.genfromtxt("preprocess/raw_filtered.csv", dtype=None, delimiter=',')
+    #ts = pd.Series(d['Value'], index=d['Time'])
+    series = pd.Series(f[29000:30000]) # consider adding index
+    plot_rolling_functions(series)
+    compare_window_sizes(series, (32,64,128,256,512))
