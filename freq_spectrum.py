@@ -34,7 +34,8 @@ def plotSpectrum(y,Fs):
     plot(frq,abs(Y),'r') # plotting the spectrum
     xlabel('Freq (Hz)')
     ylabel('|Y(freq)|')
+    show()
 
 # use filtered data
 data=pd.read_csv(join(SAMPLE_URL,'20101214163931.a.rawwave.csv'))
-plotSpectrum(list(data[' Value'])[0:1000000], 512)
+plotSpectrum(list(data[' Value'])[0:90000], 512)
