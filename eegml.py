@@ -241,7 +241,7 @@ def plot_butter(fs, lowcut, highcut, orders):
         plt.legend(loc='best')
 
 def do_filter_signal(data, low_cut, high_cut, fs, order, out_file):
-    data_np = np.array([float(i[1]) for i in data])
+    data_np = data['Value']
     data_filtered = butter_bandpass_filter(data_np,
                                            low_cut,
                                            high_cut,
@@ -250,7 +250,7 @@ def do_filter_signal(data, low_cut, high_cut, fs, order, out_file):
     limit=2000
     
     fig, ax = plt.subplots()
-    ax.plot([i[1] for i in data[0:limit]], label="Original Signal")
+    ax.plot(data[0:limit], label="Original Signal")
     ax.plot(data_filtered[0:limit], label="Filtered Signal")
     plt.grid(True)
     plt.legend(loc='best')
