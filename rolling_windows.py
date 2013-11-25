@@ -3,6 +3,7 @@ import numpy as np
 import pylab
 import matplotlib.pyplot as plt
 import pyeeg
+import sys
 
 def plot_rolling_functions(series, window_size=128):
     pd.rolling_median(series,window_size).plot(label='median')
@@ -56,10 +57,35 @@ def rolling_power_ratio(series, bands=[0.5,4,7,12,30], sample_rate=512):
 def rolling_power(series, bands=[0.5,4,7,12,30], sample_rate=512):
     return [ pyeeg.bin_power(window, bands, sample_rate)[0] for window in as_strided(series) ]
 
+def plot_power_ratio(series):
+    "TODO plot these"
+    print rolling_power_ratio(series)
+
+def print_help():
+    print 'Usage: %s [csvfile] [cmd] ... [cmd]' % sys.argv[0]
+
+
 if __name__ == "__main__":
-    f = np.genfromtxt("preprocess/raw_filtered.csv", dtype=None, delimiter=',')
+    if len(sys.argv) < 3:
+        print_help()
+        sys.exit()
+
+    filename = sys.argv[1]
+    f = np.genfromtxt(filename, dtype=None, delimiter=',')
     #ts = pd.Series(d['Value'], index=d['Time'])
-    series = pd.Series(f[29000:30000]) # consider adding index
-    plot_rolling_functions(series)
-    compare_window_sizes(series, (32,64,128,256,512))
-    plot_downsampled_rolling_median(series)
+    shortseries = pd.Series(f[29000:30000]) # consider adding index
+
+    mainfuncs = {
+        'help': lambda: print_help(),
+        'plotroll': lambda: plot_rolling_functions(shortseries),
+        'compare_window_sizes': lambda: compare_window_sizes(shortseries, (32,64,128,256,512)),
+        'plot_downsampled_rolling_median': lambda: plot_downsampled_rolling_median(shortseries),
+        'plot_power_ratio': lambda: plot_power_ratio(f)
+    }
+
+    cmds = sys.argv[2:]
+    for cmd in cmds:
+        print 'running command %s' % cmd
+        mainfuncs.get(cmd, print_help)()
+        
+    sys.exit()
