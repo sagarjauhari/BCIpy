@@ -52,14 +52,14 @@ def as_strided(series, window_size=512, step=64):
     return np.lib.stride_tricks.as_strided(series, shape=shape, strides=strides)
 
 def rolling_power_ratio(series, bands=[0.5,4,7,12,30], sample_rate=512):
-    return [ pyeeg.bin_power(window, bands, sample_rate)[1] for window in as_strided(series) ]
+    return np.array([ pyeeg.bin_power(window, bands, sample_rate)[1] for window in as_strided(series) ])
 
 def rolling_power(series, bands=[0.5,4,7,12,30], sample_rate=512):
     return [ pyeeg.bin_power(window, bands, sample_rate)[0] for window in as_strided(series) ]
 
 def plot_power_ratio(series):
-    "TODO plot these"
-    print rolling_power_ratio(series)
+    [pd.Series(freq_band).plot() for freq_band in np.transpose(rolling_power_ratio(series))]
+    plt.show()
 
 def print_help():
     print 'Usage: %s [csvfile] [cmd] ... [cmd]' % sys.argv[0]
