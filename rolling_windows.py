@@ -71,7 +71,7 @@ if __name__ == "__main__":
         sys.exit()
 
     filename = sys.argv[1]
-    f = np.genfromtxt(filename, dtype=None, delimiter=',')
+    f = pd.read_csv(filename)[' Value']
     #ts = pd.Series(d['Value'], index=d['Time'])
     shortseries = pd.Series(f[29000:30000]) # consider adding index
 
