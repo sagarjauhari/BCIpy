@@ -47,18 +47,23 @@ def plot_downsampled_rolling_median(series, window_size=64, original_freq=512, f
     plt.show()
 
 def as_strided(series, window_size=512, step=64):
+    assert len(series) >= window_size
     shape = ((len(series)-window_size)/step, window_size) # to find number of rows, discard one window_size and divide by step size
     strides = (series.strides[0]*step, series.strides[0]) # rearrange strides to move rows by step size and columns by indvidual value size
     return np.lib.stride_tricks.as_strided(series, shape=shape, strides=strides)
 
-def rolling_power_ratio(series, bands=[0.5,4,7,12,30], sample_rate=512):
-    return np.array([ pyeeg.bin_power(window, bands, sample_rate)[1] for window in as_strided(series) ])
+def rolling_power_ratio(series, bands=[0.5,4,7,12,30], sample_rate=512, window_size=512, step=64):
+    return np.array([
+        pyeeg.bin_power(window, bands, sample_rate)[1]
+        for window in as_strided(series, window_size=window_size, step=step)
+    ])
 
 def rolling_power(series, bands=[0.5,4,7,12,30], sample_rate=512):
     return [ pyeeg.bin_power(window, bands, sample_rate)[0] for window in as_strided(series) ]
 
 def plot_power_ratio(series):
     [pd.Series(freq_band).plot() for freq_band in np.transpose(rolling_power_ratio(series))]
+    #plt.gca().add_patch(Rectangle((1,1),1,1))
     plt.show()
 
 def print_help():
