@@ -1,7 +1,13 @@
 import pandas as pd, numpy as np
 import rolling_windows
+from os.path import join
 
-data = pd.read_table('preprocess/raw/20101214163931.a.rawwave_label.csv')
+try: # Import config params
+   from dev_settings import *
+except ImportError:
+   print "Please create a dev_settings.py. Example: dev_settings.py.example"
+
+data = pd.read_table(join(SAVE_URL,'raw','20101214163931.a.rawwave_label.csv'))
 grouped = data.groupby(('taskid'))
 taskids = grouped.size().keys()
 ret = grouped.mean()
@@ -10,13 +16,18 @@ ret['rolling_median'] = None
 ret['rolling_PSD'] = None
 
 for taskid in taskids:
-    eeg_signal = grouped.get_group(taskid)[' Value'] # TODO remove space from name
+    eeg_signal = grouped.get_group(taskid)[' Value']
+    # TODO remove space from name
 
-    ret.set_value(taskid, 'rolling_median', rolling_windows.downsampled_rolling_median(eeg_signal, window_size=128))
+    ret.set_value(taskid, 'rolling_median',
+                  rolling_windows.downsampled_rolling_median(eeg_signal,
+                                                             window_size=128))
 
     window_size = 512
     if len(eeg_signal) >= window_size:
-        ret.set_value(taskid, 'rolling_PSD', rolling_windows.rolling_power_ratio(eeg_signal, window_size=512))
+        ret.set_value(taskid, 'rolling_PSD',
+                      rolling_windows.rolling_power_ratio(eeg_signal,
+                                                          window_size=512))
 
 outfilename = 'features.pickle'
 ret.save(outfilename)
