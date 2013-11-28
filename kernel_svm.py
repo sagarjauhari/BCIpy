@@ -6,6 +6,9 @@ Created on Sat Nov 23 14:49:07 2013
 """
 
 from sklearn import svm
+import pickle
+from sklearn.metrics import classification_report
+
 
 
 try: # Import config params
@@ -16,31 +19,29 @@ except ImportError:
 from os.path import join
 from eegml import *
 
-#From Bao Hong Tan's Thesis - p16
-fs = 512.0
-lowcut = 0.1
-highcut = 5.0
+with open('features.pickle','r') as fi:
+    rol_feat = pickle.load(fi)
 
-#plot_butter(fs, lowcut, highcut, [1,2,3,4])
-raw_dir = join(SAVE_URL,'raw')
+# find task IDs where atleast 10 values are present
+features=[]
+targets=[]
+for i in range(135):
+    g1 = [f for f in rol_feat['rolling_median'][i][3:13]]
+    g2 = rol_feat['Difficulty'][i]
+    if len(g1) >= 10 and 1<=g2<=2:
+        features.append(g1)
+        targets.append(g2)
 
-file_in = join(raw_dir, "20101214163931.a.rawwave_label.csv")
-
-with open(join(raw_dir,file_in)) as fi:
-    fr=csv.reader(fi, delimiter='\t')
-    next(fr)#header
-    data=list(fr)
-
-filtered_data = do_filter_signal(data, lowcut, highcut, fs, 3, None)
 
 #==============================================================================
 # SVM
 #==============================================================================
-l=20000
 # SVM Fit
 clf = svm.SVC(kernel='linear')
-clf.fit([[i] for i in filtered_data[0:l]], [i[2] for i in data[0:l]])
+clf.fit(features, targets)
 
 # SVM Predict
-idx_svm = clf.predict([i[1] for i in filtered_data[0:l]])
-    
+class_pred = list(clf.predict(features))
+
+# Report
+print classification_report(targets, class_pred)
