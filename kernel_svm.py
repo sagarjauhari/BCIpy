@@ -8,6 +8,7 @@ Created on Sat Nov 23 14:49:07 2013
 from sklearn import svm
 import pickle
 from sklearn.metrics import classification_report
+from sklearn import cross_validation
 
 
 
@@ -48,3 +49,10 @@ clf = svm.SVC(kernel='rbf', probability=True)
 clf.fit(features, targets)
 class_pred = list(clf.predict_proba(features))
 print classification_report(targets, [[1,2][int(i[0]*2)] for i in class_pred])
+
+# SVM, radial basis function, cross validation
+clf = svm.SVC(kernel='rbf', probability=True)
+scores = cross_validation.cross_val_score(clf, array(features), array(targets),
+                                          cv=10)
+print "Using RBF kernel and 5 fold cross validation"
+print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
