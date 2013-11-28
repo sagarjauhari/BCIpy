@@ -43,6 +43,7 @@ class_pred = list(clf.predict(features))
 print classification_report(targets, class_pred)
 
 # SVM - Radial Basis Function kernel
+# Ref - http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC.predict_proba
 clf = svm.SVC(kernel='rbf', probability=True)
 clf.fit(features, targets)
 class_pred = list(clf.predict_proba(features))
