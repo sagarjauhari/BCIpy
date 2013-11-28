@@ -43,7 +43,7 @@ class_pred = list(clf.predict(features))
 print classification_report(targets, class_pred)
 
 # SVM - Radial Basis Function kernel
-clf = svm.SVC(kernel='rbf')
+clf = svm.SVC(kernel='rbf', probability=True)
 clf.fit(features, targets)
-class_pred = list(clf.predict(features))
-print classification_report(targets, class_pred)
+class_pred = list(clf.predict_proba(features))
+print classification_report(targets, [[1,2][int(i[0]*2)] for i in class_pred])
