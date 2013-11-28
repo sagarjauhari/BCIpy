@@ -36,12 +36,14 @@ for i in range(135):
 #==============================================================================
 # SVM
 #==============================================================================
-# SVM Fit
+# SVM - Linear
 clf = svm.SVC(kernel='linear')
 clf.fit(features, targets)
-
-# SVM Predict
 class_pred = list(clf.predict(features))
+print classification_report(targets, class_pred)
 
-# Report
+# SVM - Radial Basis Function kernel
+clf = svm.SVC(kernel='rbf')
+clf.fit(features, targets)
+class_pred = list(clf.predict(features))
 print classification_report(targets, class_pred)
