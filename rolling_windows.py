@@ -36,14 +36,16 @@ def plot_downsampled_rolling_median(series, window_size=64, original_freq=512, f
     median = pd.rolling_median(series, window_size)
     step = original_freq/freq
     downsampled = pd.rolling_median(series, window_size)[::step]
+    pd.Series(series).plot()
 
-    median.plot()
+    downsampled.plot()
     plt.title('rolling_median, window_size=%s, downsampled to %sHz' % (window_size, freq))
     annotations = [
         plt.annotate(int(val), (step*index, val))
         for index,val in enumerate(downsampled)
         if not np.isnan(val)
         ]
+    plt.legend(('original', 'rolling_median'))
     plt.show()
 
 def as_strided(series, window_size=512, step=64):
@@ -84,7 +86,7 @@ if __name__ == "__main__":
         'help': lambda: print_help(),
         'plotroll': lambda: plot_rolling_functions(shortseries),
         'compare_window_sizes': lambda: compare_window_sizes(shortseries, (32,64,128,256,512)),
-        'plot_downsampled_rolling_median': lambda: plot_downsampled_rolling_median(shortseries),
+        'plot_downsampled_rolling_median': lambda: plot_downsampled_rolling_median(f[0:9000], window_size=64),
         'plot_power_ratio': lambda: plot_power_ratio(f)
     }
 
