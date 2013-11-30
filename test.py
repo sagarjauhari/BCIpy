@@ -11,7 +11,6 @@ except ImportError:
           an example"
 
 format_task_xls("task")
-compress_time_labels(join(SAVE_URL,"task_xls_labels.csv"))
 
 from os import listdir
 from os.path import isfile, join

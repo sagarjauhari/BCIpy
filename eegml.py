@@ -53,35 +53,6 @@ def format_task_xls(file):
             row[3] = format_time(row[3])
             fw.writerow([idx, row[0], row[1], row[2], row[3], row[-1]])
 
-# deprecated?
-def compress_time_labels(file_name):
-    """
-    Combines contiguous time windows
-    with same difficulty label
-    """
-    with open(file_name, 'rb') as fi,\
-    open("./preprocess/task_xls_labels_compress.csv", 'w') as fo:
-        fr = csv.reader(fi, delimiter='\t')
-        fw = csv.writer(fo, delimiter='\t')
-        fw.writerow(fr.next()) #header
-
-        row1 = fr.next()
-        t_id =row1[0]
-        t_s = row1[1]
-        t_e = row1[2]
-        lab = row1[3]
-
-        for row in fr: #row 2 onwards
-            if row[3] == lab:
-                t_e = row[2]
-            else:
-                fw.writerow([str(t_id),str(t_s), str(t_e), lab])
-                t_id =row[0]
-                t_s = row[1]
-                t_e = row[2]
-                lab = row[3]
-        fw.writerow([str(t_id),str(t_s), str(t_e), lab]) #last row
-
 def label_data(in_file, out_file, compressed_label_file, subj_t, time_t, dbg=False):
     if dbg: print "#"+subj_t + "--------"
 
