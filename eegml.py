@@ -107,23 +107,35 @@ def label_data(in_file, out_file, compressed_label_file, subj_t, time_t, dbg=Fal
         if dbg: print "end:   "+str(lab_row[0])
     return
 
-def create_raw_incremental(in_file, out_file):
+def create_raw_incremental(in_file, out_file, time_t):
     "Create raw file with incremental miliseconds"
-    raw = pd.read_csv(in_file)
+    raw = pd.read_csv(in_file, index_col=False) # avoid index to keep it from sorting
 
-    c=0.0
+    day = time_t[0:4]+"-"+time_t[4:6]+"-"+time_t[6:8]
+
+    # Incoming data has 512Hz samples with timestamps at resolution of one
+    # second. For each second, convert the first timestamp to epoch time and
+    # blank out the others so that we can do linear interpolation.
+    # TODO estimate microseconds on first and last second, to avoid timestretch
+    # TODO make sure timezones match between this and queries we will do
+    # TODO analyze clock skew, since some seconds have more or less samples
     prev_time = None
     for i,row in raw.iterrows():
         timestamp = row['%Time']
         if timestamp==prev_time:
-            c = c + 0.001
+            raw.set_value(i, '%Time', np.NaN)
         else:
-            c = 0.0
-            prev_time = timestamp
-        raw.set_value(i, '%Time', timestamp + '.' + str(c).split('.')[1])
+            # time since 1970-01-01, in seconds
+            dt = float(format_time(day + ' ' + timestamp + '.0'))
+            raw.set_value(i, '%Time', dt)
+        prev_time = timestamp
 
-    # FIXME something is sorting timestamp alphabetically
-    raw.to_csv(out_file, index=False)
+    # reindex with interpolated timestamps
+    raw.index = pd.to_datetime(raw['%Time']\
+        .convert_objects(convert_numeric=True)\
+        .interpolate(), unit='s')
+    raw.to_csv(out_file, index=True, cols=['Value'])
+    return raw
 
 def label_data_raw(in_file, out_file, task_xls_label_file, mach_t, time_t, dbg=False):
     if dbg: print "#"+mach_t + "--------"

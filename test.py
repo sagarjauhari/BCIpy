@@ -49,12 +49,14 @@ for i in mach_dict:
     file_in = join(raw_dir, mach_dict[i]+"."+i+".rawwave.csv")
     print "processing file %s" % file_in
     file_out =join(raw_dir, mach_dict[i]+"."+i+".rawwave_microsec.csv")
-    create_raw_incremental(file_in,file_out)
+    create_raw_incremental(file_in,file_out, mach_dict[i])
     
+"""
     label_data_raw(file_out,
                  join(SAVE_URL,'raw', mach_dict[i]+"."+i+".rawwave_label.csv"),
                  join(SAVE_URL, "task_xls_labels.csv"),
                  i, mach_dict[i])
+"""
 
 #==============================================================================
 # Filters and Power spectrum
