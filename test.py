@@ -59,22 +59,6 @@ for i in mach_dict:
                  i, mach_dict[i])
 
 #==============================================================================
-# Plot raw signal
-#==============================================================================
-with open(join(SAVE_URL, "raw_incremental_label.csv"), 'r') as fi:
-    fr = csv.reader(fi, delimiter='\t')
-    next(fr)#header
-    
-    data = list(fr)
-    time_x = [i[0] for i in data]
-    signal_x = [i[1] for i in data]
-    
-    plot_signal(time_x, signal_x, 'Raw Signal - whole')
-    plot_signal(time_x[0:1000], signal_x[0:1000], 'Raw Signal - 0-1000')
-    plot_signal(time_x[315000:len(time_x)], signal_x[315000:len(signal_x)],\
-                        'Raw Signal - 315000 - end')
-
-#==============================================================================
 # Filters and Power spectrum
 #==============================================================================
 #From Bao Hong Tan's Thesis - p16
