@@ -10,6 +10,7 @@ pylab.rcParams['figure.figsize'] = 15, 6
 from os import listdir
 from os.path import join, isfile
 import numpy as np
+import pandas as pd
 import pickle
 from scipy.stats.stats import pearsonr
 
@@ -108,21 +109,20 @@ def label_data(in_file, out_file, compressed_label_file, subj_t, time_t, dbg=Fal
 
 def create_raw_incremental(in_file, out_file):
     "Create raw file with incremental miliseconds"
-    with open(in_file,'rb') as fi, open(out_file,'w') as fo:
-        fr = csv.reader(fi, delimiter=',')
-        fw = csv.writer(fo, delimiter=',')
+    raw = pd.read_csv(in_file, delimiter=', ')
 
-        fw.writerow(next(fr))#header
+    c=0.0
+    prev_time = None
+    for i,row in raw.iterrows():
+        timestamp = row['%Time']
+        if timestamp==prev_time:
+            c = c + 0.001
+        else:
+            c = 0.0
+            prev_time = timestamp
+        raw.set_value(i, '%Time', timestamp + '.' + str(c).split('.')[1])
 
-        c=0.0
-        prev_time = '100'#dummy
-        for row in fr:
-            if row[0]==prev_time:
-                c = c + 0.001
-            else:
-                c = 0.0
-                prev_time = row[0]
-            fw.writerow([row[0] + '.' + str(c).split('.')[1], row[1]])
+    raw.to_csv(out_file)
 
 def label_data_raw(in_file, out_file, task_xls_label_file, mach_t, time_t, dbg=False):
     if dbg: print "#"+mach_t + "--------"
