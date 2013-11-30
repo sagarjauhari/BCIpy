@@ -37,7 +37,10 @@ nosetests.xml
 
 # Data
 *.csv
+data/*
+preprocess/*
 
 # Sagar
 *dev_settings.py
 *.pickle
+.ipynb_checkpoints
