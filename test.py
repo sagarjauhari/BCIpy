@@ -81,9 +81,7 @@ fs = 512.0
 lowcut = 0.1
 highcut = 20.0
 
-raw_data = pd.read_csv(join(config.SAVE_URL, "raw_incremental_label.csv"), 
-                       sep='\t', 
-                       skipinitialspace=True)
+raw_data = pd.read_table(join(config.SAVE_URL, "raw_incremental_label.csv"))
 plot_butter(fs, lowcut, highcut, [1,2,3,4,5,6,7,8])
 do_filter_signal(raw_data,lowcut,highcut,fs,4,join(SAVE_URL,'raw_filtered.csv'))
                  
