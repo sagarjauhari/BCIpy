@@ -1,4 +1,5 @@
 from eegml import *
+import data_cleaning
 from os.path import join
 import pickle
 from sklearn.ensemble import RandomForestClassifier
@@ -106,10 +107,10 @@ thesis.
 However, initial plan is to remove just the data for the time slots 
 corresponding to non-zero quality
 """
-cln_data = clean_all(subj_list, subj_data)
+data_cleaning.cln_data = clean_all(subj_list, subj_data)
 pickle.dump(cln_data,open(join(SAVE_URL,"cln_data.pickle"),'wb'))
 
-plot_cleaned_counts(subj_data, cln_data)
+data_cleaning.plot_cleaned_counts(subj_data, cln_data)
 plot_subjects(subj_list, cln_data, 4)
 
 #==============================================================================
