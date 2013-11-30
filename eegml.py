@@ -109,7 +109,7 @@ def label_data(in_file, out_file, compressed_label_file, subj_t, time_t, dbg=Fal
 
 def create_raw_incremental(in_file, out_file):
     "Create raw file with incremental miliseconds"
-    raw = pd.read_csv(in_file, delimiter=', ')
+    raw = pd.read_csv(in_file)
 
     c=0.0
     prev_time = None
@@ -143,7 +143,7 @@ def label_data_raw(in_file, out_file, task_xls_label_file, mach_t, time_t, dbg=F
 
         #forward till subject mach starts
         lab_row = fr2.next()
-        while mach_t != lab_row[1]:
+        while mach_t != lab_row[0]:
             lab_row = fr2.next()
         if dbg: print "start: " + str(lab_row[0])
 

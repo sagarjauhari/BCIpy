@@ -41,21 +41,19 @@ for i in sub_dict:
 raw_dir=join(DATA_URL,'raw')
 mach_dict = create_dict_machine_data(raw_dir)
 
-format_task_xls("task_for_raw")
-
-
 if not os.path.exists(join(SAVE_URL,'raw')):
     os.makedirs(join(SAVE_URL,'raw'))
 
 # Label each raw machine file
 for i in mach_dict:
     file_in = join(raw_dir, mach_dict[i]+"."+i+".rawwave.csv")
+    print "processing file %s" % file_in
     file_out =join(raw_dir, mach_dict[i]+"."+i+".rawwave_microsec.csv")
     create_raw_incremental(file_in,file_out)
     
     label_data_raw(file_out,
                  join(SAVE_URL,'raw', mach_dict[i]+"."+i+".rawwave_label.csv"),
-                 join(SAVE_URL, "task_for_raw_xls_labels.csv"),
+                 join(SAVE_URL, "task_xls_labels.csv"),
                  i, mach_dict[i])
 
 #==============================================================================
