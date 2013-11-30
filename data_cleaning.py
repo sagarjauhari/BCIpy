@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 def get_counts(data):
     return [(i,len(data[i])) for i in data]
 

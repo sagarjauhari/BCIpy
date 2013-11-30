@@ -122,7 +122,8 @@ def create_raw_incremental(in_file, out_file):
             prev_time = timestamp
         raw.set_value(i, '%Time', timestamp + '.' + str(c).split('.')[1])
 
-    raw.to_csv(out_file)
+    # FIXME something is sorting timestamp alphabetically
+    raw.to_csv(out_file, index=False)
 
 def label_data_raw(in_file, out_file, task_xls_label_file, mach_t, time_t, dbg=False):
     if dbg: print "#"+mach_t + "--------"

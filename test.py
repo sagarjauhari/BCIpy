@@ -82,7 +82,7 @@ fs = 512.0
 lowcut = 0.1
 highcut = 20.0
 
-raw_data = pd.read_table(join(config.SAVE_URL, "raw_incremental_label.csv"))
+raw_data = pd.read_table('preprocess/raw/20101214163931.a.rawwave_label.csv')
 filters.plot_butter(fs, lowcut, highcut, [1,2,3,4,5,6,7,8])
 filters.do_filter_signal(raw_data,lowcut,highcut,fs,4,join(SAVE_URL,'raw_filtered.csv'))
                  
@@ -108,7 +108,7 @@ thesis.
 However, initial plan is to remove just the data for the time slots 
 corresponding to non-zero quality
 """
-data_cleaning.cln_data = clean_all(subj_list, subj_data)
+cln_data = data_cleaning.clean_all(subj_list, subj_data)
 pickle.dump(cln_data,open(join(SAVE_URL,"cln_data.pickle"),'wb'))
 
 data_cleaning.plot_cleaned_counts(subj_data, cln_data)
