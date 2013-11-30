@@ -19,9 +19,9 @@ warnings.filterwarnings('ignore', 'DeprecationWarning')
 
 
 try: # Import config params
-   import dev_settings as config
+    import dev_settings as config
 except ImportError:
-   print "Please create a dev_settings.py using dev_settings.py.example as an example"
+    print "Please create a dev_settings.py using dev_settings.py.example as an example"
 
 def print_config():
     print config.DATA_URL
