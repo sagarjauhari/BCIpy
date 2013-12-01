@@ -282,14 +282,6 @@ def get_num_words(DATA_URL):
         tpa = [difficulty[i] for i in sentence_idx]
         plt.hist(tpa)
 
-# Create dict of machine data
-def create_dict_machine_data(raw_dir):
-    onlyfiles_raw = [ f for f in listdir(raw_dir) if isfile(join(raw_dir,f)) ]
-    pat_raw = re.compile("[0-9]*\.[a-z0-9]*\.rawwave\.csv")
-    temp_dat_raw = [f.split('.')[0:2] for f in onlyfiles_raw if pat_raw.match(f)]
-    mach_dict = {i[1]: i[0] for i in temp_dat_raw}
-    return mach_dict
-
 def get_performance(x,y):
     """ Measures the performance metrics for x(actual)
         and y (experimental).
