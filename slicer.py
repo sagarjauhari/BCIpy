@@ -9,7 +9,7 @@ class Slicer(object):
 
     def load_tasks_from_tsv(self, taskfile):
         "reads task data from tab delimited file"
-        self.tasks = pd.read_table('data/task.xls',
+        self.tasks = pd.read_table(taskfile,
             parse_dates=['start_time', 'end_time'], index_col=False)
 
     def load_series_from_csv(self, seriesname, csvfile):
