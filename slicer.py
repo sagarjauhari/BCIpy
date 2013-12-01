@@ -28,7 +28,7 @@ class Slicer(object):
         st, et = task['start_time':'end_time']
 
         task = task.to_dict()
-        task.update({f:self.series[f].between_time(st,et) for f in features})
+        task.update({f:self.series[f][st.to_datetime():et.to_datetime()] for f in features})
         return task
 
     def print_series_info(self):
