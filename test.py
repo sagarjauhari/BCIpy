@@ -18,6 +18,10 @@ from os import listdir
 from os.path import isfile, join
 import re
 
+# Plot the values of different orders of Butterworth filter
+# Lowcut and highcut values are from Bao Hong Tan's Thesis - p16
+filters.plot_butter(512.0, 0.1, 20.0, [1,2,3,4,5,6,7,8])
+
 #==============================================================================
 # 1Hz Data
 #==============================================================================
@@ -34,18 +38,6 @@ for i in sub_dict:
             SAVE_URL + "/"+sub_dict[i] + "." +i+".labelled.csv",
             i, sub_dict[i])
 
-#==============================================================================
-# Filters and Power spectrum
-#==============================================================================
-#From Bao Hong Tan's Thesis - p16
-fs = 512.0
-lowcut = 0.1
-highcut = 20.0
-
-raw_data = pd.read_table('preprocess/raw/20101214163931.a.rawwave_label.csv')
-filters.plot_butter(fs, lowcut, highcut, [1,2,3,4,5,6,7,8])
-filters.do_filter_signal(raw_data,lowcut,highcut,fs,4,join(SAVE_URL,'raw_filtered.csv'))
-                 
 #==============================================================================
 # Individual 1hz data of subjects
 #==============================================================================

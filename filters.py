@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.signal import butter, lfilter, freqz
 import csv
@@ -13,10 +14,10 @@ def butter_bandpass(lowcut, highcut, fs, order=5):
     b, a = butter(order, [low, high], btype='band')
     return b, a
 
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
+# Default lowcut and highcut are from Bao Hong Tan's Thesis - p16
+def butter_bandpass_filter(data, lowcut=0.1, highcut=20.0, fs=512.0, order=5):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
-    return y
+    return pd.TimeSeries(lfilter(b, a, data), index=data.index.copy())
 
 def plot_butter(fs, lowcut, highcut, orders):
     """Plot the frequency response for a few different orders."""

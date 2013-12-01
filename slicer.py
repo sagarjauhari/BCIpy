@@ -1,6 +1,7 @@
 import pandas as pd, numpy as np
 import sys
 import rolling_windows
+import filters
 
 class Slicer(object):
     def __init__(self, taskfile='data/task.xls'):
@@ -47,6 +48,14 @@ class Slicer(object):
             window_size=window_size
         )
 
+    def extract_filtered_signal(self, seriesname='raw', fs=512.0, lowcut=0.1, highcut=20.0):
+        self.series[seriesname+'_butter_filtered'] = filters.butter_bandpass_filter(
+            self.series[seriesname],
+            lowcut=lowcut,
+            highcut=highcut,
+            fs=fs,
+            order=4)
+
 if __name__ == '__main__':
     print 'instantiating task slicer'
     s = Slicer()
@@ -58,10 +67,12 @@ if __name__ == '__main__':
         print 'loading raw from pickle'
         s.load_series_from_pickle('raw', sys.argv[1])
 
-    s.print_series_info()
+    print 'extracting filtered signal'
+    s.extract_filtered_signal()
     print 'extracting rolling median'
     s.extract_rolling_median()
     print 'extracting rolling PSD'
     s.extract_rolling_PSD()
     print 'fetching task 1, with features'
     print s.get_by_task_id(1, features=['raw','raw_rolling_PSD_512', 'raw_rolling_median_128'])
+    s.print_series_info()
