@@ -10,24 +10,24 @@ python process_series_files.py data/raw/ preprocess/raw/
 ## Using slicer
 The Slicer class manages timeseries and extracted features as they relate to tasks from task.xls.
 
-		# instantiating task slicer
-		s = Slicer()
+	# instantiating task slicer
+	s = Slicer()
 
-		if len(sys.argv) > 2:
-				print 'loading raw from list of csvfiles'
-				s.load_series_from_csv('raw', sys.argv[1:])
-		else:
-				print 'loading raw from pickle'
-				s.load_series_from_pickle('raw', sys.argv[1])
+	if len(sys.argv) > 2:
+			print 'loading raw from list of csvfiles'
+			s.load_series_from_csv('raw', sys.argv[1:])
+	else:
+			print 'loading raw from pickle'
+			s.load_series_from_pickle('raw', sys.argv[1])
 
-		# extract features from 'raw'
-		s.extract_filtered_signal()
-		s.extract_rolling_median()
-		s.extract_rolling_PSD()
+	# extract features from 'raw'
+	s.extract_filtered_signal()
+	s.extract_rolling_median()
+	s.extract_rolling_PSD()
 
-		# fetch task 1, with features
-		# Return type is a dict, with task-level features, plus the requested timeseries features
-		print s.get_by_task_id(1, features=['raw','raw_rolling_PSD_512', 'raw_rolling_median_128'])
+	# fetch task 1, with features
+	# Return type is a dict, with task-level features, plus the requested timeseries features
+	print s.get_by_task_id(1, features=['raw','raw_rolling_PSD_512', 'raw_rolling_median_128'])
 
 ## Using Python notebooks
 <pre>
