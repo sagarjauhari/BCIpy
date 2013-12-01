@@ -52,13 +52,22 @@ def as_strided(series, window_size=512, step=64):
     assert len(series) >= window_size
     shape = ((len(series)-window_size)/step, window_size) # to find number of rows, discard one window_size and divide by step size
     strides = (series.strides[0]*step, series.strides[0]) # rearrange strides to move rows by step size and columns by indvidual value size
-    return np.lib.stride_tricks.as_strided(series, shape=shape, strides=strides)
+    return pd.DataFrame(
+        np.lib.stride_tricks.as_strided(series, shape=shape, strides=strides),
+        index=np.lib.stride_tricks.as_strided(series.index, shape=(shape[0],), strides=(strides[0],))
+    )
 
 def rolling_power_ratio(series, bands=[0.5,4,7,12,30], sample_rate=512, window_size=512, step=64):
-    return np.array([
-        pyeeg.bin_power(window, bands, sample_rate)[1]
-        for window in as_strided(series, window_size=window_size, step=step)
-    ])
+    strided = as_strided(series, window_size=window_size, step=step)
+    print type(strided)
+    print strided
+    return pd.DataFrame(
+        [
+            pyeeg.bin_power(window, bands, sample_rate)[1]
+            for timestamp, window in strided.iterrows()
+        ],
+        index=strided.index
+    )
 
 def rolling_power(series, bands=[0.5,4,7,12,30], sample_rate=512):
     return [ pyeeg.bin_power(window, bands, sample_rate)[0] for window in as_strided(series) ]
