@@ -142,57 +142,6 @@ def create_raw_incremental(in_file, out_file, time_t, tzinfo=dateutil.tz.tzlocal
     raw.to_csv(out_file, index=True, cols=['Value'])
     return raw
 
-def label_data_raw(in_file, out_file, task_xls_label_file, mach_t, time_t, dbg=False):
-    if dbg: print "#"+mach_t + "--------"
-
-    with open(in_file, 'rb') as fi,\
-    open(task_xls_label_file, 'rb') as fi2,\
-    open(out_file, 'w') as fo:
-
-        day = time_t[0:4]+"-"+time_t[4:6]+"-"+time_t[6:8]
-        fr1 = csv.reader(fi,  delimiter=',') #microsec file
-        fr2 = csv.reader(fi2, delimiter='\t')# xls_labels.csv
-        fw  = csv.writer(fo,  delimiter='\t')
-
-        #headers
-        fw.writerow(next(fr1, None) + ['Difficulty', 'taskid'] )
-        next(fr2, None)
-
-        #forward till subject mach starts
-        lab_row = fr2.next()
-        while mach_t != lab_row[0]:
-            lab_row = fr2.next()
-        if dbg: print "start: " + str(lab_row[0])
-
-        for idx, row in enumerate(fr1):
-            row[0] = datetime.strptime(day+' '+row[0],\
-                            '%Y-%m-%d %H:%M:%S.%f').strftime('%s.%f')
-            if Decimal(row[0]) < Decimal(lab_row[3]): # t < start_time
-                label = -1
-                taskid= -1
-                fw.writerow(row + [label, taskid])
-                continue
-
-            if Decimal(row[0]) < Decimal(lab_row[4]): # t < end_time
-                label = lab_row[5]
-                taskid= lab_row[0]
-                fw.writerow(row + [label, taskid])
-                continue
-
-            while Decimal(row[0] > lab_row[4]): # t > end_time
-                try:
-                    lab_row = next(fr2)
-                    label = lab_row[5]
-                    taskid=lab_row[0]
-                except: # reached end of file
-                    label = -1
-                    taskid= -1
-                    break
-            fw.writerow(row + [label, taskid])
-
-        if dbg: print "end:   "+str(lab_row[0])
-    return
-
 def plot_signal(x_ax, y_ax, label, ax=None):
     if ax==None:
         fig, ax = plt.subplots()
