@@ -107,41 +107,6 @@ def label_data(in_file, out_file, compressed_label_file, subj_t, time_t, dbg=Fal
         if dbg: print "end:   "+str(lab_row[0])
     return
 
-def create_raw_incremental(in_file, out_file, time_t, tzinfo=dateutil.tz.tzlocal()):
-    "Create raw file with incremental miliseconds"
-    raw = pd.read_csv(in_file, index_col=False) # avoid index to keep it from sorting
-
-    day = time_t[0:4]+"-"+time_t[4:6]+"-"+time_t[6:8]
-
-    # Incoming data has 512Hz samples with timestamps at resolution of one
-    # second. For each second, convert the first timestamp to epoch time and
-    # blank out the others so that we can do linear interpolation.
-    # TODO estimate microseconds on first and last second, to avoid timestretch
-    # TODO analyze clock skew, since some seconds have more or less samples
-    # TODO consider a pandas.DatetimeIndex with just a start time and frequency
-    prev_time = None
-    for i,row in raw.iterrows():
-        timestamp = row['%Time']
-        if timestamp==prev_time:
-            raw.set_value(i, '%Time', np.NaN)
-        else:
-            timestring = day + ' ' + timestamp + '.0'
-            dt = datetime.strptime(timestring, '%Y-%m-%d %H:%M:%S.%f')\
-                .replace(tzinfo=tzinfo) # set specified tz before conversion
-            # time since UTC 1970-01-01 00:00:00, in seconds
-            dt = float(dt.strftime('%s.%f'))
-            raw.set_value(i, '%Time', dt)
-        prev_time = timestamp
-
-    # reindex with interpolated timestamps
-    raw.index = pd.DatetimeIndex(
-        pd.to_datetime(raw['%Time']\
-            .convert_objects(convert_numeric=True)\
-            .interpolate(), unit='s')
-    ).tz_localize('UTC').tz_convert(tzinfo) # convert back to original tz
-    raw.to_csv(out_file, index=True, cols=['Value'])
-    return raw
-
 def plot_signal(x_ax, y_ax, label, ax=None):
     if ax==None:
         fig, ax = plt.subplots()
