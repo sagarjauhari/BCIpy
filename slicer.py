@@ -23,6 +23,10 @@ class Slicer(object):
     def load_series_from_pickle(self, seriesname, picklefile):
         self.series[seriesname] = pd.read_pickle(picklefile)
 
+    def get_by_difficulty(self, difficulty, features=[]):
+        taskids = self.tasks.index[self.tasks.difficulty==difficulty]
+        return [self.get_by_task_id(taskid, features=features) for taskid in taskids]
+
     def get_by_task_id(self, taskid, features=[]):
         task = self.tasks.loc[taskid]
         st, et = task['start_time':'end_time']
@@ -75,4 +79,5 @@ if __name__ == '__main__':
     s.extract_rolling_PSD()
     print 'fetching task 1, with features'
     print s.get_by_task_id(1, features=['raw','raw_rolling_PSD_512', 'raw_rolling_median_128'])
+    print s.get_by_difficulty(2, features=['raw','raw_rolling_PSD_512', 'raw_rolling_median_128'])
     s.print_series_info()
