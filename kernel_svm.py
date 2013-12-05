@@ -75,12 +75,8 @@ y_test = [targets[i] for i in test]
 
 # Set the parameters by cross-validation
 tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
-                     'C': [1, 10, 100, 1000]},
-                    {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
-
-tuned_parameters = [{'kernel': ['rbf'], 
-                     'gamma': [1e-1, 1e-2, 1e-3, 1e-4],
-                     'C': [1, 10, 100]}]
+                     'C': [1, 10, 100]},
+                    {'kernel': ['linear'], 'C': [1, 10, 100]}]
 svr = svm.SVC()
 clf = GridSearchCV(svr, tuned_parameters)
 clf.fit(array(X_train), array(y_train))
