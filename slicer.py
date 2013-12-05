@@ -11,8 +11,10 @@ class Slicer(object):
 
     def load_tasks_from_tsv(self, taskfile):
         "reads task data from tab delimited file"
-        self.tasks = pd.read_table(taskfile,
-            parse_dates=['start_time', 'end_time'], index_col=False)
+        t = pd.read_table(taskfile, parse_dates=['start_time', 'end_time'], index_col=False)
+        t['word_count'] = t.stim.apply(lambda x: len(x.split()))
+        t['is_passage'] = t.word_count.apply(lambda x: x > 1)
+        self.tasks = t
 
     def load_series_from_csv(self, seriesname, csvfilelist):
         self.series[seriesname] = pd.concat([
