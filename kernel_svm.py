@@ -7,8 +7,10 @@ Created on Sat Nov 23 14:49:07 2013
 
 from sklearn import svm
 import pickle
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, accuracy_score
 from sklearn import cross_validation
+from sklearn.cross_validation import StratifiedKFold
+from sklearn.grid_search import GridSearchCV
 
 
 
@@ -56,3 +58,33 @@ scores = cross_validation.cross_val_score(clf, array(features), array(targets),
                                           cv=10)
 print "Using RBF kernel and 5 fold cross validation"
 print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
+
+#==============================================================================
+# GridSearch CV
+# http://scikit-learn.org/dev/auto_examples/grid_search_digits.html
+#==============================================================================
+# Hold out 20% for final scores
+skf = StratifiedKFold(targets, 5)
+for train, test in skf:
+    break
+X_train = [features[i] for i in train]
+y_train = [targets[i] for i in train]
+X_test = [features[i] for i in test]
+y_test = [targets[i] for i in test]
+
+# Set the parameters by cross-validation
+tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
+                     'C': [1, 10, 100, 1000]},
+                    {'kernel': ['linear'], 'C': [1, 10, 100, 1000]}]
+
+tuned_parameters = [{'kernel': ['rbf'], 
+                     'gamma': [1e-1, 1e-2, 1e-3, 1e-4],
+                     'C': [1, 10, 100]}]
+svr = svm.SVC()
+clf = GridSearchCV(svr, tuned_parameters)
+clf.fit(array(X_train), array(y_train))
+y_pred = clf.predict(X_test)
+print "Using RBF kernel, grid-search, holding out 20% data for reporting final scores"
+print(classification_report(y_test, y_pred))
+print 'Accuracy: ',accuracy_score(y_test, y_pred)
