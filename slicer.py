@@ -2,6 +2,7 @@ import pandas as pd, numpy as np
 import sys
 import rolling_windows
 import filters
+from dateutil.tz import tzlocal, tzutc
 
 class Slicer(object):
     def __init__(self, taskfile='data/task.xls'):
@@ -13,12 +14,12 @@ class Slicer(object):
         self.tasks = pd.read_table(taskfile,
             parse_dates=['start_time', 'end_time'], index_col=False)
 
-    def load_series_from_csv(self, seriesname, csvfile):
-        try: # assume a list of files
-            self.series[seriesname] = pd.concat([pd.read_csv(filename, parse_dates=[0], index_col=0,
-                squeeze=True) for filename in csvfile]).sort_index()
-        except TypeError:
-            self.series[seriesname] = pd.read_csv(csvfile, parse_dates=[0], index_col=0, squeeze=True)
+    def load_series_from_csv(self, seriesname, csvfilelist):
+        self.series[seriesname] = pd.concat([
+            pd.read_csv(filename, parse_dates=[0], index_col=0,
+                squeeze=True).tz_localize(tzutc()).tz_convert(tzlocal())
+            for filename in csvfilelist
+        ]).sort_index()
 
     def load_series_from_pickle(self, seriesname, picklefile):
         self.series[seriesname] = pd.read_pickle(picklefile)
@@ -30,9 +31,11 @@ class Slicer(object):
     def get_by_task_id(self, taskid, features=[]):
         task = self.tasks.loc[taskid]
         st, et = task['start_time':'end_time']
+        st = st.tz_localize(tzlocal())
+        et = et.tz_localize(tzlocal())
 
         task = task.to_dict()
-        task.update({f:self.series[f][st.to_datetime():et.to_datetime()] for f in features})
+        task.update({f:self.series[f][st:et] for f in features})
         return task
 
     def print_series_info(self):
