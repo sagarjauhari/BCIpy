@@ -12,6 +12,21 @@ from sklearn import cross_validation
 from sklearn.cross_validation import StratifiedKFold
 from sklearn.grid_search import GridSearchCV
 
+# example from Justis
+from slicer import Slicer
+import sys
+slicer = Slicer()
+print 'loading raw from list of csvfiles'
+slicer.load_series_from_csv('raw', sys.argv[1:])
+slicer.extract_rolling_median(seriesname='raw', window_size=128)
+slicer.extract_first_n_median()
+tasks = slicer.get_tasks()
+passage_tasks = tasks[tasks.is_passage==True]
+d1_tasks = passage_tasks[passage_tasks.difficulty==1]
+d2_tasks = passage_tasks[passage_tasks.difficulty==2]
+print d2_tasks
+sys.exit()
+
 
 
 try: # Import config params

@@ -9,6 +9,9 @@ class Slicer(object):
         self.load_tasks_from_tsv(taskfile)
         self.series = {}
 
+    def get_tasks(self):
+        return self.tasks
+
     def load_tasks_from_tsv(self, taskfile):
         "reads task data from tab delimited file"
         t = pd.read_table(taskfile, parse_dates=['start_time', 'end_time'], index_col=False)
@@ -40,6 +43,23 @@ class Slicer(object):
         task = task.to_dict()
         task.update({f:self.series[f][st:et] for f in features})
         return task
+
+    def extract_first_n_median(self, n=10):
+        X = [
+            self.get_n_samples_by_taskid(taskid, 'raw_rolling_median_128')
+            for taskid in self.tasks.index
+        ]
+        self.tasks = self.tasks.combine_first(pd.DataFrame(X, index=self.tasks.index))
+
+    def get_n_samples_by_taskid(self, taskid, feature, n=10):
+        task = self.tasks.loc[taskid]
+        st, et = task['start_time':'end_time']
+        st = st.tz_localize(tzlocal())
+        et = et.tz_localize(tzlocal())
+        ret = np.array([0,0,0,0,0,0,0,0,0,0])
+        vals = self.series[feature][st:et][:10] # get up to 10 values
+        ret[:len(vals)] = vals[:] # overwrite 0s where vals exist
+        return ret
 
     def print_series_info(self):
         print ["%s: %s" % (k, type(s)) for k,s in self.series.iteritems()]
