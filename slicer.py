@@ -3,9 +3,16 @@ import sys
 import rolling_windows
 import filters
 from dateutil.tz import tzlocal, tzutc
+from os.path import join
+
+ALL_RAW_URL='data'
+try:
+    from dev_settings import *
+except ImportError:
+    pass
 
 class Slicer(object):
-    def __init__(self, taskfile='data/task.xls'):
+    def __init__(self, taskfile=join(ALL_RAW_URL, 'task.xls')):
         self.load_tasks_from_tsv(taskfile)
         self.series = {}
 
