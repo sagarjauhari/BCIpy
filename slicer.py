@@ -2,7 +2,7 @@ import pandas as pd, numpy as np
 import sys
 import rolling_windows
 import filters
-from dateutil.tz import tzlocal, tzutc
+import pytz
 from os.path import join
 
 ALL_RAW_URL='data'
@@ -29,7 +29,7 @@ class Slicer(object):
     def load_series_from_csv(self, seriesname, csvfilelist):
         self.series[seriesname] = pd.concat([
             pd.read_csv(filename, parse_dates=[0], index_col=0,
-                squeeze=True).tz_localize(tzutc()).tz_convert(tzlocal())
+                squeeze=True).tz_localize(pytz.UTC).tz_convert(pytz.timezone('US/Eastern'))
             for filename in csvfilelist
         ]).sort_index()
 
@@ -44,8 +44,8 @@ class Slicer(object):
     def get_by_task_id(self, taskid, features=[]):
         task = self.tasks.loc[taskid]
         st, et = task['start_time':'end_time']
-        st = st.tz_localize(tzlocal())
-        et = et.tz_localize(tzlocal())
+        st = st.tz_localize(pytz.timezone('US/Eastern'))
+        et = et.tz_localize(pytz.timezone('US/Eastern'))
 
         task = task.to_dict()
         task.update({f:self.series[f][st:et] for f in features})
@@ -61,8 +61,8 @@ class Slicer(object):
     def get_n_samples_by_taskid(self, taskid, feature, n=10):
         task = self.tasks.loc[taskid]
         st, et = task['start_time':'end_time']
-        st = st.tz_localize(tzlocal())
-        et = et.tz_localize(tzlocal())
+        st = st.tz_localize(pytz.timezone('US/Eastern'))
+        et = et.tz_localize(pytz.timezone('US/Eastern'))
         ret = np.array([0,0,0,0,0,0,0,0,0,0])
         vals = self.series[feature][st:et][:10] # get up to 10 values
         ret[:len(vals)] = vals[:] # overwrite 0s where vals exist
