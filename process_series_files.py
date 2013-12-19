@@ -16,7 +16,7 @@ def create_dict_machine_data(raw_dir):
 
 def create_raw_incremental(in_file, out_file, time_t, tzinfo=dateutil.tz.tzlocal()):
     "Create raw file with incremental miliseconds"
-    raw = pd.read_csv(in_file, index_col=False) # avoid index to keep it from sorting
+    raw = pd.read_csv(in_file, skipinitialspace=True, index_col=False) # avoid index to keep it from sorting
 
     day = time_t[0:4]+"-"+time_t[4:6]+"-"+time_t[6:8]
 
