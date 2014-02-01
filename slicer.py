@@ -53,7 +53,7 @@ class Slicer(object):
 
     def extract_first_n_median(self, n=10):
         X = [
-            self.get_n_samples_by_taskid(taskid, 'raw_rolling_median_128')
+            self.get_n_samples_by_taskid(taskid, 'raw_rolling_median_128', n)
             for taskid in self.tasks.index
         ]
         self.tasks = self.tasks.combine_first(pd.DataFrame(X, index=self.tasks.index))
@@ -63,8 +63,8 @@ class Slicer(object):
         st, et = task['start_time':'end_time']
         st = st.tz_localize(pytz.timezone('US/Eastern'))
         et = et.tz_localize(pytz.timezone('US/Eastern'))
-        ret = np.array([0,0,0,0,0,0,0,0,0,0])
-        vals = self.series[feature][st:et][:10] # get up to 10 values
+        ret = np.array([0]*n)
+        vals = self.series[feature][st:et][:n] # get up to n values
         ret[:len(vals)] = vals[:] # overwrite 0s where vals exist
         return ret
 
