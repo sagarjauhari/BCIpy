@@ -113,28 +113,58 @@ def do_grid_cv_svc(X_train, y_train, X_test, y_test):
     print(classification_report(y_test, y_pred))
     print 'Accuracy: ',accuracy_score(y_test, y_pred)
 
+def do_non_lin_svc(X_train, y_train, X_test, y_test):
+    clf = svm.SVC()
+    clf.fit(array(X_train), array(y_train))
+    y_pred = clf.predict(X_test)
+    print(classification_report(y_test, y_pred))
+    print 'Accuracy: ',accuracy_score(y_test, y_pred)
+    
 #==============================================================================
 # SVM with Slicer 
 #==============================================================================
 def get_raw_file_list():
-    onlyfiles=[f for f in listdir(ALL_RAW_URL) if isfile(join(ALL_RAW_URL,f))]
-    pat = re.compile("[0-9]*\.[0-9]*\.rawwave\.csv")
+    preproc_dir = join(ALL_RAW_URL,'preprocess')
+    onlyfiles=[f for f in listdir(preproc_dir) if isfile(join(preproc_dir,f))]
+    pat = re.compile("[0-9]*\.[0-9]*\.rawwave_microsec\.csv")
     return [f for f in onlyfiles if pat.match(f)]
     
+def check_all_zeros(mat2d):
+    """
+    returns true if all values are zero
+    """
+    x_size = len(mat2d)
+    y_size = len(mat2d[0])
+    for i in range(y_size):
+        for row in mat2d:
+            if row[i] != 0:
+                return False
+    return True
+    
+    
+
 def do_kernelsvm_slicer():
+    n_vals = 10
+    
     raw_files = get_raw_file_list()
     slicer = Slicer()
     print 'loading raw from list of csvfiles'
     slicer.load_series_from_csv('raw', 
-            [join(ALL_RAW_URL, i) for i in raw_files][0:2])
+            [join(ALL_RAW_URL,'preprocess', i) for i in raw_files])
     slicer.extract_rolling_median(seriesname='raw', window_size=128)
-    slicer.extract_first_n_median()
+    slicer.extract_first_n_median(n=n_vals)
     tasks = slicer.get_tasks()
+    
+    #Remove rows in which all feature values are '0'
+    tasks = tasks[[any(tasks.iloc[i,0:n_vals]!=0) for i in tasks.index]]
+    print "Final # of rows: %d" % len(tasks)
+    
     passage_tasks = tasks[tasks.is_passage==True]
     
-    features = passage_tasks.loc[:,0:9]
-    
+    features = passage_tasks.loc[:, 0:(n_vals-1)]
     targets = list(passage_tasks.difficulty)
+    
+    assert not check_all_zeros(array(features)),"all values zero. halting!"
     
     skf = StratifiedKFold(targets, 5)
     for train, test in skf:
@@ -145,6 +175,7 @@ def do_kernelsvm_slicer():
     X_test = [features.iloc[i] for i in test]
     y_test = [targets[i] for i in test]
     
-    do_grid_cv_svc(X_train, y_train, X_test, y_test)
+    #do_grid_cv_svc(X_train, y_train, X_test, y_test)
+    do_non_lin_svc(X_train, y_train, X_test, y_test)
 
 do_kernelsvm_slicer()
