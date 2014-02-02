@@ -14,7 +14,9 @@ from sklearn.grid_search import GridSearchCV
 from os.path import join, isfile
 from os import listdir
 import re
+import sys
 from slicer import Slicer
+from numpy import array
 
 # example from Justis
 """
@@ -145,12 +147,10 @@ def check_all_zeros(mat2d):
 
 def do_kernelsvm_slicer():
     n_vals = 10
-    
-    raw_files = get_raw_file_list()
+
     slicer = Slicer()
     print 'loading raw from list of csvfiles'
-    slicer.load_series_from_csv('raw', 
-            [join(ALL_RAW_URL,'preprocess', i) for i in raw_files])
+    slicer.load_series_from_csv('raw', sys.argv[1:])
     slicer.extract_rolling_median(seriesname='raw', window_size=128)
     slicer.extract_first_n_median(n=n_vals)
     tasks = slicer.get_tasks()
