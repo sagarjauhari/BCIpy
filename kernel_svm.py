@@ -14,7 +14,10 @@ from sklearn.grid_search import GridSearchCV
 from os.path import join, isfile
 from os import listdir
 import re
+import sys
 from slicer import Slicer
+import numpy as np
+from numpy import array
 
 # example from Justis
 """
@@ -145,12 +148,10 @@ def check_all_zeros(mat2d):
 
 def do_kernelsvm_slicer():
     n_vals = 10
-    
-    raw_files = get_raw_file_list()
+
     slicer = Slicer()
     print 'loading raw from list of csvfiles'
-    slicer.load_series_from_csv('raw', 
-            [join(ALL_RAW_URL,'preprocess', i) for i in raw_files])
+    slicer.load_series_from_csv('raw', sys.argv[1:])
     slicer.extract_rolling_median(seriesname='raw', window_size=128)
     slicer.extract_first_n_median(n=n_vals)
     tasks = slicer.get_tasks()
@@ -164,15 +165,27 @@ def do_kernelsvm_slicer():
     features = passage_tasks.loc[:, 0:(n_vals-1)]
     targets = list(passage_tasks.difficulty)
     
+    count_diff = targets.count(1) - targets.count(2)
+    assert count_diff >=0,"Count negative!"    
+    
+    sort_idx = np.argsort(targets)
+    features = [features.iloc[i] for i in sort_idx]
+    features = [features[i] for i in range(count_diff,len(targets))]
+    targets = [targets[i] for i in sort_idx][count_diff:]
+    
+    assert len(features)==len(targets),"Lengths of feat and targ not same"
+    
+        
+    
     assert not check_all_zeros(array(features)),"all values zero. halting!"
     
     skf = StratifiedKFold(targets, 5)
     for train, test in skf:
         break
     
-    X_train = [features.iloc[i] for i in train]
+    X_train = [features[i] for i in train]
     y_train = [targets[i] for i in train]
-    X_test = [features.iloc[i] for i in test]
+    X_test = [features[i] for i in test]
     y_test = [targets[i] for i in test]
     
     #do_grid_cv_svc(X_train, y_train, X_test, y_test)
