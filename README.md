@@ -46,4 +46,8 @@ R --vanilla &lt; /path/to/sketchpad.R
 
 It will produce a PDF called Rplots.pdf with a page for each chart produced by the script.
 
-
+## Patching the data
+If you're using eeg_data_set2.zip_, you will want to fix the first line in 20101214171219.1.rawwave.csv to look like this:
+<pre>
+%Time,Value
+</pre>
