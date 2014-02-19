@@ -147,13 +147,10 @@ def check_all_zeros(mat2d):
     
     
 
-def do_kernelsvm_slicer(filelist):
+def do_kernelsvm_slicer(slicer):
     n_vals = 10
+    n_folds = 5
 
-    slicer = Slicer()
-    
-    print 'Loading raw from list of csvfiles'
-    slicer.load_series_from_csv('raw', filelist)
     slicer.extract_rolling_median(seriesname='raw', window_size=128)
     slicer.extract_first_n_median(n=n_vals)
     tasks = slicer.get_tasks()
@@ -167,21 +164,23 @@ def do_kernelsvm_slicer(filelist):
     features = passage_tasks.loc[:, 0:(n_vals-1)]
     targets = list(passage_tasks.difficulty)
     
+    print "Balancing classes for train and test data"
     count_diff = targets.count(1) - targets.count(2)
     assert count_diff >=0,"Count negative!"    
-    
     sort_idx = np.argsort(targets)
     features = [features.iloc[i] for i in sort_idx]
     features = [features[i] for i in range(count_diff,len(targets))]
     targets = [targets[i] for i in sort_idx][count_diff:]
-    
     assert len(features)==len(targets),"Lengths of feat and targ not same"
     assert not check_all_zeros(array(features)),"all values zero. halting!"
     
-    skf = StratifiedKFold(targets, 5)
+    
+    print "Using statrifiedKFold, K=", n_folds
+    skf = StratifiedKFold(targets, n_folds)
     for train, test in skf:
         break
     
+    print "Creating train and test data"
     X_train = [features[i] for i in train]
     y_train = [targets[i] for i in train]
     X_test = [features[i] for i in test]
@@ -191,4 +190,7 @@ def do_kernelsvm_slicer(filelist):
     do_non_lin_svc(X_train, y_train, X_test, y_test)
 
 if __name__=="__main__":
-    do_kernelsvm_slicer(sys.argv[1:])
+    slicer = Slicer()
+    print 'Loading raw from list of csvfiles'
+    slicer.load_series_from_csv('raw', sys.argv[1:])
+    do_kernelsvm_slicer(slicer)
