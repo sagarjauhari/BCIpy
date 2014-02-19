@@ -1,0 +1,22 @@
+#EEG Data Processing pipeline
+- Create boxplots of EEG power spectrum
+- Label 1 Hz data
+- plot attention, meditation, difficulty
+- Label Raw data
+- plot raw data
+- design butterworth band filter with configurable band
+- filter raw signal using butterworth
+- add plots for certain subjects
+- clean data (remove low quality data, or when attedn/medit = 0)
+- plot clean data
+- random forests directly on cleaned data
+- R script to make spectrogram
+- make spectrogram for every trial
+- import AoA data
+- kernel SVM, different kernels, cross validation (13be57900e506a46337bb0ebca6fa6c4445c9ccb)
+- rolling windows on filtered EEG signal
+- plot rolling windows (mean, median, etc)
+- use pyeeg to calculate power spectral density
+- plot power ratio (1189cc354ec97a71c2c4309e4968eef2337fd39c)
+- Slicer
+- 
