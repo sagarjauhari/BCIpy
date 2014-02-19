@@ -27,6 +27,8 @@ class Slicer(object):
         self.tasks = t
 
     def load_series_from_csv(self, seriesname, csvfilelist):
+        if csvfilelist==None or len(csvfilelist)==0:
+            raise Exception("No files to process!")
         self.series[seriesname] = pd.concat([
             pd.read_csv(filename, parse_dates=[0], index_col=0,
                 squeeze=True).tz_localize(pytz.UTC).tz_convert(pytz.timezone('US/Eastern'))
