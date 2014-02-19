@@ -117,6 +117,7 @@ def do_grid_cv_svc(X_train, y_train, X_test, y_test):
     print 'Accuracy: ',accuracy_score(y_test, y_pred)
 
 def do_non_lin_svc(X_train, y_train, X_test, y_test):
+    print "Starting non linear SVC"
     clf = svm.SVC()
     clf.fit(array(X_train), array(y_train))
     y_pred = clf.predict(X_test)
@@ -146,12 +147,13 @@ def check_all_zeros(mat2d):
     
     
 
-def do_kernelsvm_slicer():
+def do_kernelsvm_slicer(filelist):
     n_vals = 10
 
     slicer = Slicer()
-    print 'loading raw from list of csvfiles'
-    slicer.load_series_from_csv('raw', sys.argv[1:])
+    
+    print 'Loading raw from list of csvfiles'
+    slicer.load_series_from_csv('raw', filelist)
     slicer.extract_rolling_median(seriesname='raw', window_size=128)
     slicer.extract_first_n_median(n=n_vals)
     tasks = slicer.get_tasks()
@@ -174,9 +176,6 @@ def do_kernelsvm_slicer():
     targets = [targets[i] for i in sort_idx][count_diff:]
     
     assert len(features)==len(targets),"Lengths of feat and targ not same"
-    
-        
-    
     assert not check_all_zeros(array(features)),"all values zero. halting!"
     
     skf = StratifiedKFold(targets, 5)
@@ -191,4 +190,5 @@ def do_kernelsvm_slicer():
     #do_grid_cv_svc(X_train, y_train, X_test, y_test)
     do_non_lin_svc(X_train, y_train, X_test, y_test)
 
-do_kernelsvm_slicer()
+if __name__=="__main__":
+    do_kernelsvm_slicer(sys.argv[1:])

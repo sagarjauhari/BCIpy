@@ -19,4 +19,3 @@
 - use pyeeg to calculate power spectral density
 - plot power ratio (1189cc354ec97a71c2c4309e4968eef2337fd39c)
 - Slicer
-- 
