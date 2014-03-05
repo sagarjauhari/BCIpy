@@ -8,7 +8,7 @@ Created on Tue Feb 18 00:09:18 2014
 import argparse, os, datetime, shutil, glob
 from os.path import join, isfile
 from slicer import Slicer
-import process_series_files, kernel_svm, charts_for_paper, eegml
+import process_series_files, kernel_svm, charts_for_paper, eegml, filters
 from matplotlib.backends.backend_pdf import PdfPages
 
 def arg_parse():
@@ -43,6 +43,10 @@ def arg_parse():
     parser.add_argument('--plotsubjects', action='store_true',
                         help='Create charts for 1Hz data of subjects. \
                         [pam1hz]')
+
+    parser.add_argument('--filter', action='store_true',
+                        help='Use Butteworth filter and plot charts for 1Hz\
+                         subject data. [pam1hz]')
 
     args = parser.parse_args()
     return args
@@ -99,12 +103,16 @@ if __name__=="__main__":
 #==============================================================================
     elif args.intype[0] == 'pam1hz':
         eegml.format_task_xls(data_dir, temp_dir)
-        eegml.label_sub_files(data_dir, temp_dir)
+        eegml.label_sub_files(data_dir, temp_dir)        
+        subj_list = eegml.get_subject_list(temp_dir)
+        subj_data = eegml.get_data(subj_list, temp_dir)
         
         if args.plotsubjects:
-            subj_list = eegml.get_subject_list(temp_dir)
-            subj_data = eegml.get_data(subj_list, temp_dir)
-            
             pp = PdfPages(join(report_dir, 'subjects_combined.pdf'))
             eegml.plot_subjects(subj_list, subj_data, pp)
+            pp.close()
+
+        if args.filter:
+            pp = PdfPages(join(report_dir, 'subjects_filtered.pdf'))
+            filters.plot_butter(512.0, 0.1, 20.0, [1,2,3,4,5,6,7,8], pp)
             pp.close()
