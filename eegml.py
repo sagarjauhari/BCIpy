@@ -153,7 +153,7 @@ def get_data(subj_list, dir_url):
             subj_data[int(s_id)] = s_data
     return subj_data
 
-def plot_subject(s_comb, title=None):
+def plot_subject(s_comb, pdfpages, title=None):
     fig, ax = plt.subplots()
     x_ax = [int(i[0].split('.')[0]) for i in s_comb]
 
@@ -175,13 +175,13 @@ def plot_subject(s_comb, title=None):
     fig.tight_layout()
     plt.legend(loc='upper left')
     plt.title(title)
-    plt.show()
+    pdfpages.savefig(fig)
     return
 
-def plot_subjects(subj_list, data, count):
-    for i in range(count):
+def plot_subjects(subj_list, data, pdfpages, count=None):
+    for i in range(count if count else len(subj_list.keys())):
         s1 = subj_list.keys()[i]
-        plot_subject(data[int(s1)], "Subject: "+s1)
+        plot_subject(data[int(s1)], pdfpages, "Subject: "+s1)
     return
 
 def get_num_words(DATA_URL):

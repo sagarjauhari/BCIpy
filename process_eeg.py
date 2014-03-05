@@ -99,5 +99,12 @@ if __name__=="__main__":
 #==============================================================================
     elif args.intype[0] == 'pam1hz':
         eegml.format_task_xls(data_dir, temp_dir)
+        eegml.label_sub_files(data_dir, temp_dir)
+        
         if args.plotsubjects:
-            eegml.label_sub_files(data_dir, temp_dir)
+            subj_list = eegml.get_subject_list(temp_dir)
+            subj_data = eegml.get_data(subj_list, temp_dir)
+            
+            pp = PdfPages(join(report_dir, 'subjects_combined.pdf'))
+            eegml.plot_subjects(subj_list, subj_data, pp)
+            pp.close()
