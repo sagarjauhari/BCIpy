@@ -15,12 +15,18 @@ def arg_parse():
     parser = argparse.ArgumentParser(description='Process EEG Data.')
 
     parser.add_argument('-i', nargs=1 , required=True, dest='indir',
-                        help='Directory containing raw EEG Files.')
+                        help='Directory containing EEG Files.')
 
     parser.add_argument('-o', nargs=1, required=True, dest='outdir',
                         help='Path of processed data and reports. New \
                         directory with timestamp will be created inside this\
                         folder.')
+                        
+    parser.add_argument('--type', nargs=1, required=True, dest='intype',
+                        choices = ['raw', 'pam1hz'], help='Select type of\
+                        input data: Raw 512 Hz data or Neurosky\
+                        output data of 1Hz having proprietary fields: \
+                        PoorSignal, Attention and Meditation. ')
 
     parser.add_argument('--interpolate', action='store_true',
                         help='Interpolate 512Hz time stamps on 512Hz data\
@@ -32,6 +38,9 @@ def arg_parse():
     parser.add_argument('--chartsforpaper', action='store_true',
                         help='Create charts in single page PDF files.')
                         
+    parser.add_argument('--plot1hz', action='store_true',
+                        help='Create charts for 1Hz data of subjects.')
+
     args = parser.parse_args()
     return args
 
@@ -77,3 +86,4 @@ if __name__=="__main__":
         pp = PdfPages(join(report_dir, 'rolling_median.pdf'))
         charts_for_paper.do_charts(slicer, pp)
         pp.close()
+
