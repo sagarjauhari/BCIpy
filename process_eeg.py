@@ -8,7 +8,7 @@ Created on Tue Feb 18 00:09:18 2014
 import argparse, os, datetime, shutil, glob
 from os.path import join, isfile
 from slicer import Slicer
-import process_series_files, kernel_svm, charts_for_paper
+import process_series_files, kernel_svm, charts_for_paper, eegml
 from matplotlib.backends.backend_pdf import PdfPages
 
 def arg_parse():
@@ -30,16 +30,19 @@ def arg_parse():
 
     parser.add_argument('--interpolate', action='store_true',
                         help='Interpolate 512Hz time stamps on 512Hz data\
-                        having 1Hz time stamps (raw data available from CMU)')
+                        having 1Hz time stamps (raw data available from CMU). \
+                        [raw]')
 
     parser.add_argument('--kernelsvm', action='store_true',
-                        help='Perform Kernelized SVC on interpolated raw data')
+                        help='Perform Kernelized SVC on interpolated raw data.\
+                         [raw]')
                         
     parser.add_argument('--chartsforpaper', action='store_true',
-                        help='Create charts in single page PDF files.')
+                        help='Create charts in single page PDF files. [raw]')
                         
-    parser.add_argument('--plot1hz', action='store_true',
-                        help='Create charts for 1Hz data of subjects.')
+    parser.add_argument('--plotsubjects', action='store_true',
+                        help='Create charts for 1Hz data of subjects. \
+                        [pam1hz]')
 
     args = parser.parse_args()
     return args
@@ -62,28 +65,39 @@ if __name__=="__main__":
     out_dir = create_timestamp_dir(args.outdir[0])
     data_dir= args.indir[0]
     report_dir = join(out_dir, 'reports')
-
-    if args.interpolate:
-        process_series_files.process_all_in_dir(args.indir[0],
-                                                join(out_dir,'data'))
-        data_dir = join(out_dir,'data')
+    temp_dir = join(out_dir, 'data')
+    
+#==============================================================================
+#     Process Raw Data
+#==============================================================================
+    if args.intype[0]=='raw':
+        if args.interpolate:
+            process_series_files.process_all_in_dir(args.indir[0],
+                                                    join(out_dir,'data'))
+            data_dir = join(out_dir,'data')
+            
+        """
+        else: #just copy the files
+            print "Copying data files to ", data_dir
+            for csvf in glob.iglob(join(args.indir[0],"*.csv")):
+                shutil.copyfile(csvf, join(data_dir, os.path.basename(csvf)))
+        """
+        print "Instantiating Slicer and loading series"
+        slicer = Slicer()
+        filelist=[join(data_dir,f) for f in os.listdir(data_dir)]
+        slicer.load_series_from_csv('raw', filelist)
         
-    """
-    else: #just copy the files
-        print "Copying data files to ", data_dir
-        for csvf in glob.iglob(join(args.indir[0],"*.csv")):
-            shutil.copyfile(csvf, join(data_dir, os.path.basename(csvf)))
-    """
-    print "Instantiating Slicer and loading series"
-    slicer = Slicer()
-    filelist=[join(data_dir,f) for f in os.listdir(data_dir)]
-    slicer.load_series_from_csv('raw', filelist)
-    
-    if args.kernelsvm:
-        kernel_svm.do_kernelsvm_slicer(slicer)
-    
-    if args.chartsforpaper:
-        pp = PdfPages(join(report_dir, 'rolling_median.pdf'))
-        charts_for_paper.do_charts(slicer, pp)
-        pp.close()
-
+        if args.kernelsvm:
+            kernel_svm.do_kernelsvm_slicer(slicer)
+        
+        if args.chartsforpaper:
+            pp = PdfPages(join(report_dir, 'rolling_median.pdf'))
+            charts_for_paper.do_charts(slicer, pp)
+            pp.close()
+#==============================================================================
+#      Process neurosky proprietary data
+#==============================================================================
+    elif args.intype[0] == 'pam1hz':
+        eegml.format_task_xls(data_dir, temp_dir)
+        if args.plotsubjects:
+            eegml.label_sub_files(data_dir, temp_dir)
