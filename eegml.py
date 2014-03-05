@@ -36,9 +36,9 @@ def format_time(ti):
     to = Decimal(to.strftime('%s.%f'))
     return str(to)
 
-def format_task_xls(file):
-    path_task_xls = join(config.DATA_URL, file + ".xls")
-    path_task_xls_labels = join(config.SAVE_URL,  file + "_xls_labels.csv")
+def format_task_xls(indir, outdir):
+    path_task_xls = join(indir, "task.xls")
+    path_task_xls_labels = join(outdir,  "task_xls_labels.csv")
 
     with open(path_task_xls, 'rb') as fi,\
     open(path_task_xls_labels, 'w') as fo:
@@ -116,6 +116,23 @@ def plot_signal(x_ax, y_ax, label, ax=None):
     plt.legend(loc='upper left')
     plt.show()
     return ax
+
+def create_sub_dict(indir):
+    """ Create dict of subject data [1Hz conmbined files]"""
+    onlyfiles = [ f for f in listdir(indir) if isfile(join(indir,f)) ]
+    pat = re.compile("[0-9]*\.[0-9]*\.combined\.csv")
+    temp_dat = [f.split('.')[0:2] for f in onlyfiles if pat.match(f)]
+    sub_dict = {i[1]: i[0] for i in temp_dat}
+    return sub_dict
+    
+def label_sub_files(indir, outdir):
+    """ Label each subject file [1Hz conmbined files]"""
+    sub_dict = create_sub_dict(indir)    
+    for i in sub_dict:
+        label_data(indir + "/"+sub_dict[i] + "." +i+".combined.csv",
+                outdir + "/task_xls_labels.csv",
+                outdir + "/"+sub_dict[i] + "." +i+".labelled.csv",
+                i, sub_dict[i])
 
 def get_subject_list(dir_url):
     onlyfiles = [ f for f in listdir(dir_url) if isfile(join(dir_url,f)) ]
