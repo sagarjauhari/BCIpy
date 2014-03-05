@@ -16,7 +16,7 @@ def clean_all(subj_list, subj_data):
         cln_data[int(s)] = clean_subj(subj_data[int(s)])
     return cln_data
 
-def plot_cleaned_counts(subj_data, cln_data):
+def plot_cleaned_counts(subj_data, cln_data, pdfpages):
     cnt1=get_counts(subj_data)
     cnt2=get_counts(cln_data)
 
@@ -29,3 +29,4 @@ def plot_cleaned_counts(subj_data, cln_data):
     plt.legend()
     plt.grid()
     plt.title("Comparing original and new size of data")
+    pdfpages.savefig()

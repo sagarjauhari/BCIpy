@@ -5,10 +5,11 @@ Created on Tue Feb 18 00:09:18 2014
 @author: sagar
 """
 
-import argparse, os, datetime, shutil, glob
+import argparse, os, datetime, shutil, glob, pickle
 from os.path import join, isfile
 from slicer import Slicer
 import process_series_files, kernel_svm, charts_for_paper, eegml, filters
+import data_cleaning
 from matplotlib.backends.backend_pdf import PdfPages
 
 def arg_parse():
@@ -47,6 +48,11 @@ def arg_parse():
     parser.add_argument('--filter', action='store_true',
                         help='Use Butteworth filter and plot charts for 1Hz\
                          subject data. [pam1hz]')
+                         
+    parser.add_argument('--clean', action='store_true',
+                        help='Remove data with 0 attention or meditation\
+                        values; Remove data with > 0 poor signal value.\
+                        [pam1hz]')
 
     args = parser.parse_args()
     return args
@@ -115,4 +121,14 @@ if __name__=="__main__":
         if args.filter:
             pp = PdfPages(join(report_dir, 'subjects_filtered.pdf'))
             filters.plot_butter(512.0, 0.1, 20.0, [1,2,3,4,5,6,7,8], pp)
+            pp.close()
+            
+        if args.clean:
+            pp = PdfPages(join(report_dir, 'subjects_cleaned.pdf'))
+            clean_data = data_cleaning.clean_all(subj_list, subj_data)
+            pickle.dump(clean_data, open(join(temp_dir, 
+                                            "clean_data_1hz.pickle"),'wb'))
+            
+            data_cleaning.plot_cleaned_counts(subj_data, clean_data, pp)
+            eegml.plot_subjects(subj_list, clean_data, pp)
             pp.close()
