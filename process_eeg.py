@@ -46,9 +46,15 @@ def arg_parse():
                         help='Create charts for 1Hz data of subjects. \
                         [pam1hz]')
     
-    parser.add_argument('--plotavgrolmed', action='store_true',
-                        help='Plot average rolling median of first second for \
-                        1st second. [pam1hz]')
+    parser.add_argument('--plotavgrolmed', nargs=1, dest='nsamp',
+                        type=int,
+                        help='Plot average rolling median of first NSAMP \
+                        samples. Note: Rolling median is usually downsampled\
+                        to 10Hz, so 1st second = 10 samples. [raw]')
+                        
+    parser.add_argument('--plotavgraw', action='store_true',
+                        help='Plot raw signal averaged over all subjects for \
+                        1st second. [raw]')
 
     parser.add_argument('--filter', action='store_true',
                         help='Use Butteworth filter and plot charts for 1Hz\
@@ -110,8 +116,8 @@ if __name__=="__main__":
             charts_for_paper.do_charts(slicer, pp)
             pp.close()
             
-        if args.plotavgrolmed:
-            n_samples = 512
+        if args.nsamp:
+            n_samples = args.nsamp[0]
             pp = PdfPages(join(report_dir, 'rolling_median_avg.pdf'))
             
             slicer.extract_rolling_median(seriesname='raw', window_size=128)
@@ -119,15 +125,20 @@ if __name__=="__main__":
             tasks = slicer.get_tasks()
             
             # Remove tasks which have all '0' values
-            tasks = tasks[[any(tasks.iloc[i,0:n_samples]!=0) for i in tasks.index]]
+            #tasks = tasks[[any(tasks.iloc[i,0:n_samples]!=0) for i in tasks.index]]
             
             # Pick numbered columns corresponding to the 'n_vals' number of
             # columns
             features = tasks.loc[:, 0:(n_samples-1)]
             targets = tasks.difficulty
             
-            eegml.plot_avg_rows(targets, features, pp)
+            eegml.plot_avg_rows(targets, features, pp, n_samples)
             pp.close()
+            
+        if args.plotavgraw:
+            print "hello"
+            
+        
             
 #==============================================================================
 #      Process neurosky proprietary data

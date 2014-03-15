@@ -187,24 +187,23 @@ def plot_subjects(subj_list, data, pdfpages, count=None):
 def plot_avg_rows(targets, features, pdfpages, n):
     print "Plotting Avg rolling median"
     
-    avg_all = [sum(features.get(i))/float(len(features.get(i))) for i in range(0, n)]
+    avg_all = features.mean()
+    
+    features['difficulty']=targets
+    grouped = features.groupby(by='difficulty')
+    
     
     fig, ax = plt.subplots()
     ax.plot(avg_all, label='all')
 
     for d in range(1,5):
-        idx = [i for i,x in enumerate(targets) if x==d]
-        if len(idx)==0:
-            continue
-        avg = [sum([list(features.get(i))[j] for j in idx])/float(len(idx)) \
-                                                for i in range(0, n)]
-        ax.plot(avg, label="difficulty: %d (%d tasks)" % (d, len(idx)))
+        ax.plot(grouped.get_group(d).mean()[0:n-1], 
+             label="difficulty: %d (%d tasks)" % (d,len(grouped.get_group(d))))
     
     plt.legend(loc='upper right')
     plt.title("Average rolling medians")
     ax.grid(True)    
     pdfpages.savefig(fig)
-
 
 
 def get_num_words(DATA_URL):
