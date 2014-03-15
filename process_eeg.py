@@ -11,6 +11,7 @@ from slicer import Slicer
 import process_series_files, kernel_svm, charts_for_paper, eegml, filters
 import data_cleaning
 from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.pyplot as plt
 
 def arg_parse():
     parser = argparse.ArgumentParser(description='Process EEG Data.')
@@ -44,6 +45,10 @@ def arg_parse():
     parser.add_argument('--plotsubjects', action='store_true',
                         help='Create charts for 1Hz data of subjects. \
                         [pam1hz]')
+    
+    parser.add_argument('--plotavgrolmed', action='store_true',
+                        help='Plot average rolling median of first second for \
+                        1st second. [pam1hz]')
 
     parser.add_argument('--filter', action='store_true',
                         help='Use Butteworth filter and plot charts for 1Hz\
@@ -104,6 +109,26 @@ if __name__=="__main__":
             pp = PdfPages(join(report_dir, 'rolling_median.pdf'))
             charts_for_paper.do_charts(slicer, pp)
             pp.close()
+            
+        if args.plotavgrolmed:
+            n_samples = 512
+            pp = PdfPages(join(report_dir, 'rolling_median_avg.pdf'))
+            
+            slicer.extract_rolling_median(seriesname='raw', window_size=128)
+            slicer.extract_first_n_median(n=n_samples)
+            tasks = slicer.get_tasks()
+            
+            # Remove tasks which have all '0' values
+            tasks = tasks[[any(tasks.iloc[i,0:n_samples]!=0) for i in tasks.index]]
+            
+            # Pick numbered columns corresponding to the 'n_vals' number of
+            # columns
+            features = tasks.loc[:, 0:(n_samples-1)]
+            targets = tasks.difficulty
+            
+            eegml.plot_avg_rows(targets, features, pp)
+            pp.close()
+            
 #==============================================================================
 #      Process neurosky proprietary data
 #==============================================================================

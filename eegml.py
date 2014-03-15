@@ -183,6 +183,14 @@ def plot_subjects(subj_list, data, pdfpages, count=None):
         s1 = subj_list.keys()[i]
         plot_subject(data[int(s1)], pdfpages, "Subject: "+s1)
     return
+    
+def plot_avg_rows(targets, features, pdfpages):
+    print "Plotting Avg rolling median"
+    
+    fig, ax = plt.subplots()
+    ax.plot([sum(features.get(i))/float(len(features.get(i))) for i in range(1, 512)])
+    ax.grid(True)    
+    pdfpages.savefig(fig)
 
 def get_num_words(DATA_URL):
     path_task_xls = DATA_URL + "/task.xls"

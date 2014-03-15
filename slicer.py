@@ -54,6 +54,10 @@ class Slicer(object):
         return task
 
     def extract_first_n_median(self, n=10):
+        """
+        To the existing dataframe, add additional 'n' columns which are the 1st
+        'n' values of the rolling median for each task. 
+        """
         X = [
             self.get_n_samples_by_taskid(taskid, 'raw_rolling_median_128', n)
             for taskid in self.tasks.index
