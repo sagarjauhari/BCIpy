@@ -187,10 +187,27 @@ def plot_subjects(subj_list, data, pdfpages, count=None):
 def plot_avg_rows(targets, features, pdfpages):
     print "Plotting Avg rolling median"
     
+    avg_all = [sum(features.get(i))/float(len(features.get(i))) for i in range(0, 512)]
+    
     fig, ax = plt.subplots()
-    ax.plot([sum(features.get(i))/float(len(features.get(i))) for i in range(1, 512)])
+    ax.plot(avg_all)
+    plt.title("Average over all tasks")
     ax.grid(True)    
     pdfpages.savefig(fig)
+
+    for d in range(1,5):
+        idx = [i for i,x in enumerate(targets) if x==d]
+        if len(idx)==0:
+            continue
+        avg = [sum([list(features.get(i))[j] for j in idx])/float(len(idx)) \
+                                                for i in range(0, 512)]
+        fig, ax = plt.subplots()
+        ax.plot(avg)
+        plt.title("Average over tasks of difficulty: %d" % d)
+        ax.grid(True)    
+        pdfpages.savefig(fig)
+
+
 
 def get_num_words(DATA_URL):
     path_task_xls = DATA_URL + "/task.xls"
