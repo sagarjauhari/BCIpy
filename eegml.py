@@ -184,28 +184,26 @@ def plot_subjects(subj_list, data, pdfpages, count=None):
         plot_subject(data[int(s1)], pdfpages, "Subject: "+s1)
     return
     
-def plot_avg_rows(targets, features, pdfpages):
+def plot_avg_rows(targets, features, pdfpages, n):
     print "Plotting Avg rolling median"
     
-    avg_all = [sum(features.get(i))/float(len(features.get(i))) for i in range(0, 512)]
+    avg_all = [sum(features.get(i))/float(len(features.get(i))) for i in range(0, n)]
     
     fig, ax = plt.subplots()
-    ax.plot(avg_all)
-    plt.title("Average over all tasks")
-    ax.grid(True)    
-    pdfpages.savefig(fig)
+    ax.plot(avg_all, label='all')
 
     for d in range(1,5):
         idx = [i for i,x in enumerate(targets) if x==d]
         if len(idx)==0:
             continue
         avg = [sum([list(features.get(i))[j] for j in idx])/float(len(idx)) \
-                                                for i in range(0, 512)]
-        fig, ax = plt.subplots()
-        ax.plot(avg)
-        plt.title("Average over tasks of difficulty: %d (%d tasks)" % (d, len(idx)))
-        ax.grid(True)    
-        pdfpages.savefig(fig)
+                                                for i in range(0, n)]
+        ax.plot(avg, label="difficulty: %d (%d tasks)" % (d, len(idx)))
+    
+    plt.legend(loc='upper right')
+    plt.title("Average rolling medians")
+    ax.grid(True)    
+    pdfpages.savefig(fig)
 
 
 
