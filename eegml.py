@@ -203,7 +203,7 @@ def plot_avg_rows(targets, features, pdfpages):
                                                 for i in range(0, 512)]
         fig, ax = plt.subplots()
         ax.plot(avg)
-        plt.title("Average over tasks of difficulty: %d" % d)
+        plt.title("Average over tasks of difficulty: %d (%d tasks)" % (d, len(idx)))
         ax.grid(True)    
         pdfpages.savefig(fig)
 
