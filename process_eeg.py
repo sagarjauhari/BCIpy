@@ -12,6 +12,7 @@ import process_series_files, kernel_svm, charts_for_paper, eegml, filters
 import data_cleaning
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
+import re
 
 def arg_parse():
     parser = argparse.ArgumentParser(description='Process EEG Data.')
@@ -52,7 +53,8 @@ def arg_parse():
                         samples. Note: Rolling median is usually downsampled\
                         to 10Hz, so 1st second = 10 samples. [raw]')
                         
-    parser.add_argument('--plotavgraw', action='store_true',
+    parser.add_argument('--plotavgraw', nargs=1, dest='nsampraw',
+                        type=int,
                         help='Plot raw signal averaged over all subjects for \
                         1st second. [raw]')
 
@@ -104,8 +106,9 @@ if __name__=="__main__":
                 shutil.copyfile(csvf, join(data_dir, os.path.basename(csvf)))
         """
         print "Instantiating Slicer and loading series"
-        slicer = Slicer()
-        filelist=[join(data_dir,f) for f in os.listdir(data_dir)]
+        slicer = Slicer(taskfile=join(data_dir,'task.xls'))
+        filelist=[join(data_dir,f) for f in os.listdir(data_dir) if \
+            re.compile(".*\.csv").match(f)]
         slicer.load_series_from_csv('raw', filelist)
         
         if args.kernelsvm:
@@ -124,10 +127,7 @@ if __name__=="__main__":
             slicer.extract_first_n_median(n=n_samples)
             tasks = slicer.get_tasks()
             
-            # Remove tasks which have all '0' values
-            #tasks = tasks[[any(tasks.iloc[i,0:n_samples]!=0) for i in tasks.index]]
-            
-            # Pick numbered columns corresponding to the 'n_vals' number of
+            # Pick numbered columns corresponding to the 'n_samples' number of
             # columns
             features = tasks.loc[:, 0:(n_samples-1)]
             targets = tasks.difficulty
@@ -135,9 +135,23 @@ if __name__=="__main__":
             eegml.plot_avg_rows(targets, features, pp, n_samples)
             pp.close()
             
-        if args.plotavgraw:
-            print "hello"
+        if args.nsampraw:
+            n_samples = args.nsampraw[0]
+            pp = PdfPages(join(report_dir, 'raw_avg.pdf'))
             
+            slicer.load_tasks_from_tsv(join(data_dir,'task.xls'))
+            slicer.print_series_info()
+            slicer.extract_first_n_raw(n=n_samples)
+            tasks = slicer.get_tasks()
+            
+            # Pick numbered columns corresponding to the 'n_samples' number of
+            # columns
+            features = tasks.loc[:, 0:(n_samples-1)]
+            targets = tasks.difficulty
+            
+            eegml.plot_avg_rows(targets, features, pp, n_samples)
+            
+            pp.close()
         
             
 #==============================================================================
