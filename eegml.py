@@ -185,7 +185,7 @@ def plot_subjects(subj_list, data, pdfpages, count=None):
     return
     
 def plot_avg_rows(targets, features, pdfpages, n):
-    print "Plotting Avg rolling median"
+    print "Plotting Avg of dataframe"
     
     avg_all = features.mean()
     

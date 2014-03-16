@@ -52,6 +52,17 @@ class Slicer(object):
         task = task.to_dict()
         task.update({f:self.series[f][st:et] for f in features})
         return task
+        
+    def extract_first_n_raw(self, n=10):
+        """
+        Extract the first 'n' samples for each task's raw data
+        and save in self.tasks
+        """
+        X = [
+            self.get_n_samples_by_taskid(taskid, 'raw', n)
+            for taskid in self.tasks.index
+        ]
+        self.tasks = self.tasks.combine_first(pd.DataFrame(X, index=self.tasks.index))
 
     def extract_first_n_median(self, n=10):
         """
@@ -78,6 +89,7 @@ class Slicer(object):
         print ["%s: %s" % (k, type(s)) for k,s in self.series.iteritems()]
 
     def extract_rolling_median(self, seriesname='raw', window_size=128):
+        print "Extracting rolling median"
         new_feature_name = seriesname+'_rolling_median_'+str(window_size)
         self.series[new_feature_name]=rolling_windows.downsampled_rolling_median(
             self.series[seriesname],
@@ -91,7 +103,8 @@ class Slicer(object):
             window_size=window_size
         )
 
-    def extract_filtered_signal(self, seriesname='raw', fs=512.0, lowcut=0.1, highcut=20.0):
+    def extract_filtered_signal(self, seriesname='raw', fs=512.0, lowcut=0.1, 
+                                highcut=20.0):
         self.series[seriesname+'_butter_filtered'] = filters.butter_bandpass_filter(
             self.series[seriesname],
             lowcut=lowcut,
@@ -117,7 +130,12 @@ if __name__ == '__main__':
     print 'extracting rolling PSD'
     s.extract_rolling_PSD()
     print 'fetching task 1, with features'
-    print s.get_by_task_id(1, features=['raw','raw_rolling_PSD_512', 'raw_rolling_median_128'])
-    print s.get_passage_tasks_by_difficulty(2, features=['raw','raw_rolling_PSD_512', 'raw_rolling_median_128'])
+    print s.get_by_task_id(1, features=['raw',
+                                        'raw_rolling_PSD_512', 
+                                        'raw_rolling_median_128'])
+    print s.get_passage_tasks_by_difficulty(2, 
+                                            features=['raw',
+                                                      'raw_rolling_PSD_512',
+                                                      'raw_rolling_median_128'])
     print [(d['SUBJECT'], len(d['raw'])) for d in s.get_passage_tasks_by_difficulty(1, features=['raw'])]
     s.print_series_info()
