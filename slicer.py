@@ -84,6 +84,17 @@ class Slicer(object):
         vals = self.series[feature][st:et][:n] # get up to n values
         ret[:len(vals)] = vals[:] # overwrite 0s where vals exist
         return ret
+        
+    def get_time_duration_by_taskid(self, taskid):
+        """
+        Returns task duration in seconds
+        """
+        task = self.tasks.loc[taskid]
+        st, et = task['start_time':'end_time']
+        st = st.tz_localize(pytz.timezone('US/Eastern'))
+        et = et.tz_localize(pytz.timezone('US/Eastern'))
+        return (et - st).microseconds/1000000.0
+        
 
     def print_series_info(self):
         print ["%s: %s" % (k, type(s)) for k,s in self.series.iteritems()]

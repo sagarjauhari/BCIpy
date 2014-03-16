@@ -9,7 +9,7 @@ import argparse, os, datetime, shutil, glob, pickle
 from os.path import join, isfile
 from slicer import Slicer
 import process_series_files, kernel_svm, charts_for_paper, eegml, filters
-import data_cleaning
+import data_cleaning, stats
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import re
@@ -62,10 +62,14 @@ def arg_parse():
                         help='Use Butteworth filter and plot charts for 1Hz\
                          subject data. [pam1hz]')
                          
+    parser.add_argument('--stats', action='store_true',
+                        help='General statistics of data [raw]')
+                         
     parser.add_argument('--clean', action='store_true',
                         help='Remove data with 0 attention or meditation\
                         values; Remove data with > 0 poor signal value.\
                         [pam1hz]')
+    
 
     args = parser.parse_args()
     return args
@@ -111,6 +115,11 @@ if __name__=="__main__":
             re.compile(".*\.csv").match(f)]
         slicer.load_series_from_csv('raw', filelist)
         
+        if args.stats:
+            pp = PdfPages(join(report_dir, 'stats.pdf'))
+            stats.plot_all(slicer, pp)
+            pp.close()
+            
         if args.kernelsvm:
             kernel_svm.do_kernelsvm_slicer(slicer)
         
@@ -132,7 +141,8 @@ if __name__=="__main__":
             features = tasks.loc[:, 0:(n_samples-1)]
             targets = tasks.difficulty
             
-            eegml.plot_avg_rows(targets, features, pp, n_samples)
+            eegml.plot_avg_rows(targets, features, pp, n_samples, 
+                                "Average rolling medians")
             pp.close()
             
         if args.nsampraw:
@@ -140,7 +150,6 @@ if __name__=="__main__":
             pp = PdfPages(join(report_dir, 'raw_avg.pdf'))
             
             slicer.load_tasks_from_tsv(join(data_dir,'task.xls'))
-            slicer.print_series_info()
             slicer.extract_first_n_raw(n=n_samples)
             tasks = slicer.get_tasks()
             
@@ -149,7 +158,8 @@ if __name__=="__main__":
             features = tasks.loc[:, 0:(n_samples-1)]
             targets = tasks.difficulty
             
-            eegml.plot_avg_rows(targets, features, pp, n_samples)
+            eegml.plot_avg_rows(targets, features, pp, n_samples, 
+                                "Average of raw data")
             
             pp.close()
         

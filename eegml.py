@@ -184,7 +184,7 @@ def plot_subjects(subj_list, data, pdfpages, count=None):
         plot_subject(data[int(s1)], pdfpages, "Subject: "+s1)
     return
     
-def plot_avg_rows(targets, features, pdfpages, n):
+def plot_avg_rows(targets, features, pdfpages, n, title):
     print "Plotting Avg of dataframe"
     
     avg_all = features.mean()
@@ -196,12 +196,12 @@ def plot_avg_rows(targets, features, pdfpages, n):
     fig, ax = plt.subplots()
     ax.plot(avg_all, label='all')
 
-    for d in range(1,5):
+    for d in range(1, 3):
         ax.plot(grouped.get_group(d).mean()[0:n-1], 
              label="difficulty: %d (%d tasks)" % (d,len(grouped.get_group(d))))
     
     plt.legend(loc='upper right')
-    plt.title("Average rolling medians")
+    plt.title(title)
     ax.grid(True)    
     pdfpages.savefig(fig)
 
