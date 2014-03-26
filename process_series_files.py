@@ -33,7 +33,6 @@ def create_raw_incremental(in_file, out_file, time_t, tzinfo=dateutil.tz.tzlocal
         if timestamp==prev_time:
             raw.set_value(i, '%Time', np.NaN)
         else:
-            print day, timestamp #debug
             timestring = day + ' ' + timestamp + '.0'
             dt = datetime.strptime(timestring, '%Y-%m-%d %H:%M:%S.%f')\
                 .replace(tzinfo=tzinfo) # set specified tz before conversion
@@ -49,8 +48,6 @@ def create_raw_incremental(in_file, out_file, time_t, tzinfo=dateutil.tz.tzlocal
     dt = float(dt.strftime('%s.%f'))
     raw.set_value(i, '%Time', dt+1)
 
-    print [i for i in raw['%Time']] #debug    
-    
     # reindex with interpolated timestamps
     raw.index = pd.DatetimeIndex(
         pd.to_datetime(raw['%Time']\
@@ -64,7 +61,6 @@ def process_all_in_dir(indir, outdir):
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     mach_dict = create_dict_machine_data(indir)
-    #print mach_dict #debug
     for i in mach_dict:
         file_in = join(indir, mach_dict[i]+"."+i+".rawwave.csv")
         print "processing file %s" % file_in

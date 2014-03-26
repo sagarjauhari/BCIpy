@@ -154,6 +154,9 @@ def get_data(subj_list, dir_url):
     return subj_data
 
 def plot_subject(s_comb, pdfpages, title=None):
+    """
+    Plot each subject's data (1Hz)
+    """
     fig, ax = plt.subplots()
     x_ax = [int(i[0].split('.')[0]) for i in s_comb]
 
@@ -165,7 +168,7 @@ def plot_subject(s_comb, pdfpages, title=None):
     taskid_set = list(set(taskid))
     taskid_norm = [taskid_set.index(i) for i in taskid]
 
-    ax.plot(x_ax,sig_q, label='Quality')
+    ax.plot(x_ax, sig_q, label='Quality')
     ax.plot(x_ax, atten, label='Attention')
     ax.plot(x_ax, medit, label='Meditation')
     ax.plot(x_ax, diffi, label='Difficulty')
@@ -185,6 +188,10 @@ def plot_subjects(subj_list, data, pdfpages, count=None):
     return
     
 def plot_avg_rows(targets, features, pdfpages, n, title):
+    """
+    Given targets (difficulty) and features, plot the average of each features
+    grouped by the difficulty.
+    """
     print "Plotting Avg of dataframe"
     
     avg_all = features.mean()
@@ -196,7 +203,7 @@ def plot_avg_rows(targets, features, pdfpages, n, title):
     fig, ax = plt.subplots()
     ax.plot(avg_all, label='all')
 
-    for d in range(1, 3):
+    for d in range(1, 5):
         ax.plot(grouped.get_group(d).mean()[0:n-1], 
              label="difficulty: %d (%d tasks)" % (d,len(grouped.get_group(d))))
     

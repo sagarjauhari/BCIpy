@@ -56,7 +56,12 @@ def arg_parse():
     parser.add_argument('--plotavgraw', nargs=1, dest='nsampraw',
                         type=int,
                         help='Plot raw signal averaged over all subjects for \
-                        1st second. [raw]')
+                        1st NSAMPRAW samples. [raw]')
+                        
+    parser.add_argument('--plotraw', nargs=1, dest='nraw',
+                        type=int,
+                        help='Plot raw signal of all subjects for \
+                        1st NRAW samples. [raw]')
 
     parser.add_argument('--filter', action='store_true',
                         help='Use Butteworth filter and plot charts for 1Hz\
@@ -113,11 +118,17 @@ if __name__=="__main__":
         slicer = Slicer(taskfile=join(data_dir,'task.xls'))
         filelist=[join(data_dir,f) for f in os.listdir(data_dir) if \
             re.compile(".*\.csv").match(f)]
+        num_subjects = len(filelist)
         slicer.load_series_from_csv('raw', filelist)
         
         if args.stats:
             pp = PdfPages(join(report_dir, 'stats.pdf'))
             stats.plot_all(slicer, pp)
+            
+            fig, ax = plt.subplots()
+            ax.plot(range(1,num_subjects+1))
+            plt.title("Number of subjects")            
+            pp.savefig(fig)
             pp.close()
             
         if args.kernelsvm:
@@ -162,6 +173,14 @@ if __name__=="__main__":
                                 "Average of raw data")
             
             pp.close()
+            
+        if args.nraw:
+            n_samples = args.nraw[0]
+            pp = PdfPages(join(report_dir, 'raw.pdf'))
+            
+            slicer.load_tasks_from_tsv(join(data_dir,'task.xls'))
+            slicer.extract_first_n_raw(n=n_samples)
+            tasks = slicer.get_tasks()
         
             
 #==============================================================================
