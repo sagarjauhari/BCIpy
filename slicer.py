@@ -129,6 +129,9 @@ class Slicer(object):
 
     def extract_rolling_median(self, seriesname='raw', window_size=128):
         """Extracts a rolling median for the specified series"""
+        print "Extracting rolling median: name=%s window_size=%d" \
+                                                 % (seriesname, window_size)
+
         new_feature_name = seriesname+'_rolling_median_'+str(window_size)
         self.series[new_feature_name]=rolling_windows.downsampled_rolling_median(
             self.series[seriesname],
