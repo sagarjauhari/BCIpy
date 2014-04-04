@@ -19,7 +19,7 @@
 # Random Forest Classifier
 #    Bib: [Breiman, Leo. "Random forests." Machine learning 45.1 (2001): 5-32.]
 #    Brief overview: http://blog.yhathq.com/posts/random-forests-in-python.html
-# This classifier is often as the first technique to find out obvious and 
+# This classifier is often as the first technique to find out obvious and
 # sometimes not-so-obvious relationships
 #==============================================================================
 subj_id = 27
