@@ -18,7 +18,7 @@
 -->
 Copyright 2013, 2014 Justis Grant Peters and Sagar Jauhari
 
-# edm_eeg
+# BCIpy
 Code repository for our project in Educational Data Mining class with Dr. Tiffany Barnes, CSC 591-021 Fall 2013 at NCSU. We are analyzing EEG data collected by Mostow and Chang from Project LISTEN.
 
 ## Using the data processing pipeline
@@ -101,3 +101,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
+
+# Dependencies
+- [PyEEG](https://code.google.com/p/pyeeg/) - Licenced under GPL V3
+
