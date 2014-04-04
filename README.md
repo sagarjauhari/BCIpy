@@ -1,5 +1,44 @@
-# edm_eeg
+<!--
+# Copyright 2013, 2014 Justis Grant Peters and Sagar Jauhari
+
+# This file is part of BCIpy.
+# 
+# BCIpy is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# BCIpy is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
+-->
+&copy; 2013, 2014 Justis Grant Peters and Sagar Jauhari
+
+# BCIpy
+#### Python toolkit to analyse EEG data
 Code repository for our project in Educational Data Mining class with Dr. Tiffany Barnes, CSC 591-021 Fall 2013 at NCSU. We are analyzing EEG data collected by Mostow and Chang from Project LISTEN.
+
+## Using the data processing pipeline
+	$ python process_eeg.py -h
+	usage: process_eeg.py [-h] -i INDIR -o OUTDIR [--interpolate] [--kernelsvm]
+                      	[--chartsforpaper]
+
+	Process EEG Data.
+	
+	optional arguments:
+	  -h, --help        show this help message and exit
+	  -i INDIR          Directory containing raw EEG Files.
+	  -o OUTDIR         Path of processed data and reports. New directory with
+	                    timestamp will be created inside this folder.
+	  --interpolate     Interpolate 512Hz time stamps on 512Hz data having 1Hz
+	                    time stamps (raw data available from CMU)
+	  --kernelsvm       Perform Kernelized SVC on interpolated raw data
+	  --chartsforpaper  Create charts in single page PDF files.
+
 
 ## Processing timeseries data from CMU
 The 512Hz data from CMU has timestamp information, but only at 1Hz resolution. To interpolate these:
@@ -51,3 +90,25 @@ If you're using eeg_data_set2.zip_, you will want to fix the first line in 20101
 <pre>
 %Time,Value
 </pre>
+
+# License and Copyright
+&copy; 2013, 2014 Justis Grant Peters and Sagar Jauhari
+
+This file is part of BCIpy.
+
+BCIpy is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+BCIpy is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
+
+# Dependencies
+- [PyEEG](https://code.google.com/p/pyeeg/) - Licenced under GPL V3
+

@@ -1,3 +1,21 @@
+# /usr/bin/env python
+# Copyright 2013, 2014 Justis Grant Peters and Sagar Jauhari
+
+# This file is part of BCIpy.
+# 
+# BCIpy is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# BCIpy is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
+
 import csv
 import time
 import re
@@ -36,9 +54,9 @@ def format_time(ti):
     to = Decimal(to.strftime('%s.%f'))
     return str(to)
 
-def format_task_xls(file):
-    path_task_xls = join(config.DATA_URL, file + ".xls")
-    path_task_xls_labels = join(config.SAVE_URL,  file + "_xls_labels.csv")
+def format_task_xls(indir, outdir):
+    path_task_xls = join(indir, "task.xls")
+    path_task_xls_labels = join(outdir,  "task_xls_labels.csv")
 
     with open(path_task_xls, 'rb') as fi,\
     open(path_task_xls_labels, 'w') as fo:
@@ -117,6 +135,23 @@ def plot_signal(x_ax, y_ax, label, ax=None):
     plt.show()
     return ax
 
+def create_sub_dict(indir):
+    """ Create dict of subject data [1Hz conmbined files]"""
+    onlyfiles = [ f for f in listdir(indir) if isfile(join(indir,f)) ]
+    pat = re.compile("[0-9]*\.[0-9]*\.combined\.csv")
+    temp_dat = [f.split('.')[0:2] for f in onlyfiles if pat.match(f)]
+    sub_dict = {i[1]: i[0] for i in temp_dat}
+    return sub_dict
+    
+def label_sub_files(indir, outdir):
+    """ Label each subject file [1Hz conmbined files]"""
+    sub_dict = create_sub_dict(indir)    
+    for i in sub_dict:
+        label_data(indir + "/"+sub_dict[i] + "." +i+".combined.csv",
+                outdir + "/task_xls_labels.csv",
+                outdir + "/"+sub_dict[i] + "." +i+".labelled.csv",
+                i, sub_dict[i])
+
 def get_subject_list(dir_url):
     onlyfiles = [ f for f in listdir(dir_url) if isfile(join(dir_url,f)) ]
     pat = re.compile("[0-9]*\.[0-9]*\.labelled\.csv")
@@ -136,7 +171,10 @@ def get_data(subj_list, dir_url):
             subj_data[int(s_id)] = s_data
     return subj_data
 
-def plot_subject(s_comb, title=None):
+def plot_subject(s_comb, pdfpages, title=None):
+    """
+    Plot each subject's data (1Hz)
+    """
     fig, ax = plt.subplots()
     x_ax = [int(i[0].split('.')[0]) for i in s_comb]
 
@@ -148,7 +186,7 @@ def plot_subject(s_comb, title=None):
     taskid_set = list(set(taskid))
     taskid_norm = [taskid_set.index(i) for i in taskid]
 
-    ax.plot(x_ax,sig_q, label='Quality')
+    ax.plot(x_ax, sig_q, label='Quality')
     ax.plot(x_ax, atten, label='Attention')
     ax.plot(x_ax, medit, label='Meditation')
     ax.plot(x_ax, diffi, label='Difficulty')
@@ -158,14 +196,40 @@ def plot_subject(s_comb, title=None):
     fig.tight_layout()
     plt.legend(loc='upper left')
     plt.title(title)
-    plt.show()
+    pdfpages.savefig(fig)
     return
 
-def plot_subjects(subj_list, data, count):
-    for i in range(count):
+def plot_subjects(subj_list, data, pdfpages, count=None):
+    for i in range(count if count else len(subj_list.keys())):
         s1 = subj_list.keys()[i]
-        plot_subject(data[int(s1)], "Subject: "+s1)
+        plot_subject(data[int(s1)], pdfpages, "Subject: "+s1)
     return
+    
+def plot_avg_rows(targets, features, pdfpages, n, title):
+    """
+    Given targets (difficulty) and features, plot the average of each features
+    grouped by the difficulty.
+    """
+    print "Plotting Avg of dataframe"
+    
+    avg_all = features.mean()
+    
+    features['difficulty']=targets
+    grouped = features.groupby(by='difficulty')
+    
+    
+    fig, ax = plt.subplots()
+    ax.plot(avg_all, label='all')
+
+    for d in range(1, 5):
+        ax.plot(grouped.get_group(d).mean()[0:n-1], 
+             label="difficulty: %d (%d tasks)" % (d,len(grouped.get_group(d))))
+    
+    plt.legend(loc='upper right')
+    plt.title(title)
+    ax.grid(True)    
+    pdfpages.savefig(fig)
+
 
 def get_num_words(DATA_URL):
     path_task_xls = DATA_URL + "/task.xls"

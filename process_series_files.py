@@ -1,3 +1,21 @@
+# /usr/bin/env python
+# Copyright 2013, 2014 Justis Grant Peters and Sagar Jauhari
+
+# This file is part of BCIpy.
+# 
+# BCIpy is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# BCIpy is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
+
 import sys, os
 from os.path import isfile, join
 import re
@@ -19,6 +37,7 @@ def create_raw_incremental(in_file, out_file, time_t, tzinfo=dateutil.tz.tzlocal
     raw = pd.read_csv(in_file, skipinitialspace=True, index_col=False) # avoid index to keep it from sorting
 
     day = time_t[0:4]+"-"+time_t[4:6]+"-"+time_t[6:8]
+    #print day #debug
 
     # Incoming data has 512Hz samples with timestamps at resolution of one
     # second. For each second, convert the first timestamp to epoch time and
@@ -39,6 +58,13 @@ def create_raw_incremental(in_file, out_file, time_t, tzinfo=dateutil.tz.tzlocal
             dt = float(dt.strftime('%s.%f'))
             raw.set_value(i, '%Time', dt)
         prev_time = timestamp
+        
+    timestring = day + ' ' + prev_time + '.0'
+    dt = datetime.strptime(timestring, '%Y-%m-%d %H:%M:%S.%f')\
+        .replace(tzinfo=tzinfo) # set specified tz before conversion
+    # time since UTC 1970-01-01 00:00:00, in seconds
+    dt = float(dt.strftime('%s.%f'))
+    raw.set_value(i, '%Time', dt+1)
 
     # reindex with interpolated timestamps
     raw.index = pd.DatetimeIndex(

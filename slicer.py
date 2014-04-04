@@ -1,3 +1,21 @@
+# /usr/bin/env python
+# Copyright 2013, 2014 Justis Grant Peters and Sagar Jauhari
+
+# This file is part of BCIpy.
+# 
+# BCIpy is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# BCIpy is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
+
 import pandas as pd, numpy as np
 import sys
 import rolling_windows
@@ -30,6 +48,9 @@ class Slicer(object):
 
     def load_series_from_csv(self, seriesname, csvfilelist):
         """Reads a single series from a CSV file and merges it with the current data"""
+        if csvfilelist==None or len(csvfilelist)==0:
+            raise Exception("No files to process!")
+       
         self.series[seriesname] = pd.concat([
             pd.read_csv(filename, parse_dates=[0], index_col=0,
                 squeeze=True).tz_localize(pytz.UTC).tz_convert(pytz.timezone('US/Eastern'))
@@ -56,9 +77,24 @@ class Slicer(object):
         task = task.to_dict()
         task.update({f:self.series[f][st:et] for f in features})
         return task
+        
+    def extract_first_n_raw(self, n=10):
+        """
+        Extract the first 'n' samples for each task's raw data
+        and save in self.tasks
+        """
+        X = [
+            self.get_n_samples_by_taskid(taskid, 'raw', n)
+            for taskid in self.tasks.index
+        ]
+        self.tasks = self.tasks.combine_first(pd.DataFrame(X, index=self.tasks.index))
 
     def extract_first_n_median(self, n=10):
-        """Extracts just the first n samples from the rolling median, primarily to normalize sample vectors to the same length."""
+        """Extracts just the first n samples from the rolling median, 
+        primarily to normalize sample vectors to the same length.
+        To the existing dataframe, adds additional 'n' columns which are the 1st
+        'n' values of the rolling median for each task. 
+        """
         X = [
             self.get_n_samples_by_taskid(taskid, 'raw_rolling_median_128', n)
             for taskid in self.tasks.index
@@ -75,6 +111,17 @@ class Slicer(object):
         vals = self.series[feature][st:et][:n] # get up to n values
         ret[:len(vals)] = vals[:] # overwrite 0s where vals exist
         return ret
+        
+    def get_time_duration_by_taskid(self, taskid):
+        """
+        Returns task duration in seconds
+        """
+        task = self.tasks.loc[taskid]
+        st, et = task['start_time':'end_time']
+        st = st.tz_localize(pytz.timezone('US/Eastern'))
+        et = et.tz_localize(pytz.timezone('US/Eastern'))
+        return (et - st).microseconds/1000000.0
+        
 
     def print_series_info(self):
         """Prints info about all series available, primarily for debugging purposes"""

@@ -1,3 +1,21 @@
+# /usr/bin/env python
+# Copyright 2013, 2014 Justis Grant Peters and Sagar Jauhari
+
+# This file is part of BCIpy.
+# 
+# BCIpy is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# BCIpy is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
+
 import matplotlib.pyplot as plt
 
 def get_counts(data):
@@ -16,7 +34,7 @@ def clean_all(subj_list, subj_data):
         cln_data[int(s)] = clean_subj(subj_data[int(s)])
     return cln_data
 
-def plot_cleaned_counts(subj_data, cln_data):
+def plot_cleaned_counts(subj_data, cln_data, pdfpages):
     cnt1=get_counts(subj_data)
     cnt2=get_counts(cln_data)
 
@@ -29,3 +47,4 @@ def plot_cleaned_counts(subj_data, cln_data):
     plt.legend()
     plt.grid()
     plt.title("Comparing original and new size of data")
+    pdfpages.savefig()
