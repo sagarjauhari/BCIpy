@@ -113,7 +113,7 @@ If you're using eeg_data_set2.zip_, you will want to fix the first line in 20101
 %Time,Value
 </pre>
 
-# License and Copyright
+## License and Copyright
 &copy; 2013, 2014 Justis Grant Peters and Sagar Jauhari
 
 This file is part of BCIpy.
@@ -131,6 +131,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
 
-# Dependencies
+## Dependencies
 - [PyEEG](https://code.google.com/p/pyeeg/) - Licenced under GPL V3
 
