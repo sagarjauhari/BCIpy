@@ -23,21 +23,43 @@
 Code repository for our project in Educational Data Mining class with Dr. Tiffany Barnes, CSC 591-021 Fall 2013 at NCSU. We are analyzing EEG data collected by Mostow and Chang from Project LISTEN.
 
 ## Using the data processing pipeline
-	$ python process_eeg.py -h
-	usage: process_eeg.py [-h] -i INDIR -o OUTDIR [--interpolate] [--kernelsvm]
-                      	[--chartsforpaper]
-
+	$ python process_eeg.py --help
+	usage: process_eeg.py [-h] -i INDIR -o OUTDIR --type {raw,pam1hz}
+	                      [--interpolate] [--kernelsvm] [--chartsforpaper]
+	                      [--plotsubjects] [--plotavgrolmed NSAMP]
+	                      [--plotavgraw NSAMPRAW] [--plotraw NRAW] [--filter]
+	                      [--stats] [--clean]
+	
 	Process EEG Data.
 	
 	optional arguments:
-	  -h, --help        show this help message and exit
-	  -i INDIR          Directory containing raw EEG Files.
-	  -o OUTDIR         Path of processed data and reports. New directory with
-	                    timestamp will be created inside this folder.
-	  --interpolate     Interpolate 512Hz time stamps on 512Hz data having 1Hz
-	                    time stamps (raw data available from CMU)
-	  --kernelsvm       Perform Kernelized SVC on interpolated raw data
-	  --chartsforpaper  Create charts in single page PDF files.
+	  -h, --help            show this help message and exit
+	  -i INDIR              Directory containing EEG Files.
+	  -o OUTDIR             Path of processed data and reports. New directory with
+	                        timestamp will be created inside this folder.
+	  --type {raw,pam1hz}   Select type of input data: Raw 512 Hz data or Neurosky
+	                        output data of 1Hz having proprietary fields:
+	                        PoorSignal, Attention and Meditation.
+	  --interpolate         Interpolate 512Hz time stamps on 512Hz data having 1Hz
+	                        time stamps (raw data available from CMU). [raw]
+	  --kernelsvm           Perform Kernelized SVC on interpolated raw data. [raw]
+	  --chartsforpaper      Create charts in single page PDF files. [raw]
+	  --plotsubjects        Create charts for 1Hz data of subjects. [pam1hz]
+	  --plotavgrolmed NSAMP
+	                        Plot average rolling median of first NSAMP samples.
+	                        Note: Rolling median is usually downsampled to 10Hz,
+	                        so 1st second = 10 samples. [raw]
+	  --plotavgraw NSAMPRAW
+	                        Plot raw signal averaged over all subjects for 1st
+	                        NSAMPRAW samples. [raw]
+	  --plotraw NRAW        Plot raw signal of all subjects for 1st NRAW samples.
+	                        [raw]
+	  --filter              Use Butteworth filter and plot charts for 1Hz subject
+	                        data. [pam1hz]
+	  --stats               General statistics of data [raw]
+	  --clean               Remove data with 0 attention or meditation values;
+	                        Remove data with > 0 poor signal value. [pam1hz]
+
 
 
 ## Processing timeseries data from CMU
