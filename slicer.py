@@ -17,11 +17,12 @@
 # along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
 
 import pandas as pd, numpy as np
-import sys
+import sys, re
 import rolling_windows
 import filters
 import pytz
 from os.path import join
+from StringIO import StringIO
 
 ALL_RAW_URL='data'
 try:
@@ -41,7 +42,17 @@ class Slicer(object):
 
     def load_tasks_from_tsv(self, taskfile):
         """Reads task data from tab delimited file"""
-        t = pd.read_table(taskfile, parse_dates=['start_time', 'end_time'], index_col=False)
+
+        # Find start_time and end_time column names
+        st_regex=re.compile("[sS]tart_[tT]ime")
+        et_regex=re.compile("[eE]nd_[tT]ime")
+        with open(taskfile, 'r') as tf:
+            head = ''.join(tf.readlines(1))
+        cols = head.split('\t')
+        start_time = [m.group(0) for l in cols for m in [st_regex.search(l)] if m][0]
+        end_time = [m.group(0) for l in cols for m in [et_regex.search(l)] if m][0]
+
+        t = pd.read_table(taskfile, parse_dates=[start_time, end_time], index_col=False)
         t['word_count'] = t.stim.apply(lambda x: len(x.split()))
         t['is_passage'] = t.word_count.apply(lambda x: x > 1)
         self.tasks = t
@@ -50,7 +61,7 @@ class Slicer(object):
         """Reads a single series from a CSV file and merges it with the current data"""
         if csvfilelist==None or len(csvfilelist)==0:
             raise Exception("No files to process!")
-       
+
         self.series[seriesname] = pd.concat([
             pd.read_csv(filename, parse_dates=[0], index_col=0,
                 squeeze=True).tz_localize(pytz.UTC).tz_convert(pytz.timezone('US/Eastern'))
@@ -77,7 +88,7 @@ class Slicer(object):
         task = task.to_dict()
         task.update({f:self.series[f][st:et] for f in features})
         return task
-        
+
     def extract_first_n_raw(self, n=10):
         """
         Extract the first 'n' samples for each task's raw data
@@ -90,10 +101,10 @@ class Slicer(object):
         self.tasks = self.tasks.combine_first(pd.DataFrame(X, index=self.tasks.index))
 
     def extract_first_n_median(self, n=10):
-        """Extracts just the first n samples from the rolling median, 
+        """Extracts just the first n samples from the rolling median,
         primarily to normalize sample vectors to the same length.
         To the existing dataframe, adds additional 'n' columns which are the 1st
-        'n' values of the rolling median for each task. 
+        'n' values of the rolling median for each task.
         """
         X = [
             self.get_n_samples_by_taskid(taskid, 'raw_rolling_median_128', n)
@@ -111,7 +122,7 @@ class Slicer(object):
         vals = self.series[feature][st:et][:n] # get up to n values
         ret[:len(vals)] = vals[:] # overwrite 0s where vals exist
         return ret
-        
+
     def get_time_duration_by_taskid(self, taskid):
         """
         Returns task duration in seconds
@@ -121,7 +132,7 @@ class Slicer(object):
         st = st.tz_localize(pytz.timezone('US/Eastern'))
         et = et.tz_localize(pytz.timezone('US/Eastern'))
         return (et - st).microseconds/1000000.0
-        
+
 
     def print_series_info(self):
         """Prints info about all series available, primarily for debugging purposes"""
