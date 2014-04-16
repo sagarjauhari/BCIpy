@@ -2,17 +2,17 @@
 # Copyright 2013, 2014 Justis Grant Peters and Sagar Jauhari
 
 # This file is part of BCIpy.
-# 
+#
 # BCIpy is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # BCIpy is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with BCIpy.  If not, see <http://www.gnu.org/licenses/>.
 -->
@@ -29,9 +29,9 @@ Code repository for our project in Educational Data Mining class with Dr. Tiffan
 	                      [--plotsubjects] [--plotavgrolmed NSAMP]
 	                      [--plotavgraw NSAMPRAW] [--plotraw NRAW] [--filter]
 	                      [--stats] [--clean]
-	
+
 	Process EEG Data.
-	
+
 	optional arguments:
 	  -h, --help            show this help message and exit
 	  -i INDIR              Directory containing EEG Files.
@@ -112,6 +112,24 @@ If you're using eeg_data_set2.zip_, you will want to fix the first line in 20101
 <pre>
 %Time,Value
 </pre>
+
+## Sample Code Recipes
+### Creating preprocessed files
+It is a good idea to preprocess the raw files by interpolating the timestamps for the 512Hz data and use these preprocessed files for data analysis.
+
+    $ python process_eeg.py -i /media/media/DATA/eeg/eeg_data_set2/ -o /media/media/DATA/eeg/output/preprocess --type raw --interpolate
+
+Now the preprocessed files in `/media/media/DATA/eeg/output/preprocess` can be used for further analysis.
+### Plotting the average value of rolling medians for all samples over the 1st second
+Since rolling median is downsampled to 10Hz, to analyse the average value of rolling medians of all the samples on the 1st second we need to use the 1st 10 observations.
+
+    $ python process_eeg.py -i /media/media/DATA/eeg/eeg_data_set2/preprocess/ -o /media/media/DATA/eeg/output/ --type raw --plotavgrolmed 10
+
+Now lets do the same thing with for the 1st 10 seconds
+
+    $ python process_eeg.py -i /media/media/DATA/eeg/eeg_data_set2/preprocess/ -o /media/media/DATA/eeg/output/ --type raw --plotavgrolmed 100
+
+
 
 ## License and Copyright
 &copy; 2013, 2014 Justis Grant Peters and Sagar Jauhari
