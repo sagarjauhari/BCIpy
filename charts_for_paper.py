@@ -33,23 +33,30 @@ def do_charts(slicer, pdfpages):
     
     window_sizes = [32, 64, 128]
     raw = slicer.series['raw'][start:end]
-    raw.plot()
+    raw_x = [int(j.microseconds/1000) for j in [i-raw.index[0] for i in raw.index]]
+    raw_y = [i for i in raw]
+    plt.plot(raw_x, raw_y)
+    
     
     for ws in window_sizes:
         slicer.extract_rolling_median(seriesname = 'raw', window_size = ws)
         rm = slicer.series['raw_rolling_median_' + str(ws)][start:end]
-        rm.plot(xticks=[i for i in rm.index])
+        rm_x = [int(j.microseconds/1000) for j in [i-rm.index[0] for i in rm.index]]
+        rm_y = [i for i in rm]
+        #rm.plot(xticks=rm.index)
+        plt.plot(rm_x, rm_y)
     
-    plt.legend(['512Hz EEG']+[ 'Rolling Median %d window size' % ws \
+    plt.legend(['512Hz EEG']+[ 'Window size: %d' % ws \
                                 for ws in window_sizes]
                                 ,loc='best')
     plt.ylabel(r"Potential ($\mu$V)")
-    plt.xlabel(r"Time ($\mu$Sec)")
+    plt.xlabel(r"Time after stimulus (ms)")
+    plt.grid()
     #plt.title('10 Hz rolling median, compared to 512Hz signal')
-    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%S.%f'))
     ax.set_ylim(ax.get_ylim()[::-1])
+    
     pdfpages.savefig()
-    #plt.show()
+    #plt.show() #debug
    
 if __name__=="__main__":
     slicer = Slicer()
